@@ -1,0 +1,16 @@
+# Compiled Java Output
+target/
+bin/
+*.class
+
+# SQLite Database File
+saranyamart.db
+*.sqlite
+
+# IDE Artifacts
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project

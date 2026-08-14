@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaranyaMart | Multi-Seller E-Commerce Marketplace</title>
+    <meta name="description" content="SaranyaMart - Premium online shopping platform where buyers find quality products, sellers grow businesses, and admins oversee marketplace excellence.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-logo" onclick="app.showHome()">
+                <div class="logo-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="logo-text">Saranya<span>Mart</span></div>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Search laptops, mobiles, electronics..." id="global-search">
+                <button class="search-btn">Search</button>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="nav-actions" id="nav-actions">
+                <button class="btn btn-outline" id="btn-login-modal" onclick="app.openModal('login')">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </button>
+                <button class="btn btn-primary" id="btn-register-modal" onclick="app.openModal('register')">
+                    <i class="fa-solid fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- Logged-In User Profile Info -->
+            <div class="user-profile-header hidden" id="user-profile-header">
+                <div class="user-avatar" id="user-avatar-initial">U</div>
+                <div class="user-details">
+                    <span class="user-name" id="header-user-name">User</span>
+                    <span class="role-badge" id="header-user-role">Buyer</span>
+                </div>
+                <button class="btn btn-icon-logout" title="Logout" onclick="app.logout()">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main View Container -->
+    <main class="main-content">
+        <!-- Hero Section (Visible to Guest / Home) -->
+        <section id="hero-view" class="hero-section">
+            <div class="hero-grid">
+                <div class="hero-text">
+                    <span class="hero-tag"><i class="fa-solid fa-sparkles"></i> Welcome to SaranyaMart</span>
+                    <h1>India's Next-Gen Multi-Seller Marketplace</h1>
+                    <p>Shop quality electronics, laptops, mobiles, and fashion directly from verified sellers. Register today as a <strong>Buyer</strong> to shop or as a <strong>Seller</strong> to expand your online business.</p>
+
+                    <div class="hero-cta-buttons">
+                        <button class="btn btn-primary btn-lg" onclick="app.openModal('register', 'buyer')">
+                            <i class="fa-solid fa-cart-shopping"></i> Start Shopping as Buyer
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="app.openModal('register', 'seller')">
+                            <i class="fa-solid fa-store"></i> Become a Seller
+                        </button>
+                    </div>
+
+                    <!-- Quick Demo Credentials Box -->
+                    <div class="demo-credentials-card">
+                        <div class="demo-title"><i class="fa-solid fa-key"></i> Quick Demo Logins (Week 1 Setup)</div>
+                        <div class="demo-chips">
+                            <button class="demo-chip" onclick="app.quickLogin('admin@saranyamart.com', 'Admin@123')">
+                                <span class="chip-role admin">Admin</span> admin@saranyamart.com
+                            </button>
+                            <button class="demo-chip" onclick="app.quickLogin('seller@saranyamart.com', 'Seller@123')">
+                                <span class="chip-role seller">Seller</span> seller@saranyamart.com
+                            </button>
+                            <button class="demo-chip" onclick="app.quickLogin('buyer@saranyamart.com', 'Buyer@123')">
+                                <span class="chip-role buyer">Buyer</span> buyer@saranyamart.com
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-card-stack">
+                        <div class="glass-card main-preview-card">
+                            <div class="card-header-badge">Featured Offer</div>
+                            <div class="card-img-placeholder">
+                                <i class="fa-solid fa-laptop-code"></i>
+                            </div>
+                            <h3>High Performance Laptop</h3>
+                            <div class="price-row">
+                                <span class="price">₹45,000</span>
+                                <span class="badge seller-badge"><i class="fa-solid fa-circle-check"></i> Priya Electronics</span>
+                            </div>
+                        </div>
+                        <div class="glass-card sub-card">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <div>
+                                <h4>Smart Mobile 5G</h4>
+                                <span class="price-sm">₹18,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Role Specific Dashboard Panels -->
+        <!-- 1. BUYER DASHBOARD VIEW -->
+        <section id="buyer-dashboard" class="dashboard-section hidden">
+            <div class="dashboard-header">
+                <div>
+                    <h2><i class="fa-solid fa-bag-shopping"></i> Buyer Portal</h2>
+                    <p>Welcome back! Browse curated products and view your orders.</p>
+                </div>
+                <div class="dashboard-metrics">
+                    <div class="metric-pill"><i class="fa-solid fa-cart-shopping"></i> Cart: <strong>0 items</strong></div>
+                    <div class="metric-pill"><i class="fa-solid fa-box"></i> Orders: <strong>0 Total</strong></div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card text-center empty-state-card">
+                    <div class="empty-icon"><i class="fa-solid fa-store-slash"></i></div>
+                    <h3>Product Catalog Unlocks in Week 2</h3>
+                    <p>Week 1 Registration & Login module is active. In Week 2, product inventory added by Sellers will appear here for checkout!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SELLER DASHBOARD VIEW -->
+        <section id="seller-dashboard" class="dashboard-section hidden">
+            <div class="dashboard-header">
+                <div>
+                    <h2><i class="fa-solid fa-store"></i> Seller Management Center</h2>
+                    <p>Manage your inventory, list laptops & mobiles, and track customer orders.</p>
+                </div>
+                <button class="btn btn-primary" onclick="app.showToast('Product Addition unlocks in Week 2 Module!', 'info')">
+                    <i class="fa-solid fa-plus"></i> Add New Product
+                </button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon indigo"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val">2</span>
+                        <span class="stat-lbl">Active Listings</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon emerald"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val">₹63,000</span>
+                        <span class="stat-lbl">Catalog Value</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val">0</span>
+                        <span class="stat-lbl">Orders Received</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sample-seller-items">
+                <h3>Sample Listed Products (Week 2 Preview)</h3>
+                <div class="product-preview-table">
+                    <div class="table-row table-head">
+                        <div>Product Name</div>
+                        <div>Category</div>
+                        <div>Price</div>
+                        <div>Status</div>
+                    </div>
+                    <div class="table-row">
+                        <div><i class="fa-solid fa-laptop"></i> High-End Laptop</div>
+                        <div>Electronics</div>
+                        <div class="fw-bold">₹45,000</div>
+                        <div><span class="status-badge active">Active</span></div>
+                    </div>
+                    <div class="table-row">
+                        <div><i class="fa-solid fa-mobile-screen"></i> 5G Smartphone</div>
+                        <div>Mobile</div>
+                        <div class="fw-bold">₹18,000</div>
+                        <div><span class="status-badge active">Active</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ADMIN DASHBOARD VIEW -->
+        <section id="admin-dashboard" class="dashboard-section hidden">
+            <div class="dashboard-header">
+                <div>
+                    <h2><i class="fa-solid fa-shield-halved"></i> SaranyaMart Admin Panel</h2>
+                    <p>System Administrator Control & Overview of Users and Platform Security.</p>
+                </div>
+                <button class="btn btn-secondary" onclick="app.loadUsersTable()">
+                    <i class="fa-solid fa-rotate"></i> Refresh User List
+                </button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="admin-total-users">3</span>
+                        <span class="stat-lbl">Total Users</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon emerald"><i class="fa-solid fa-store"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="admin-total-sellers">1</span>
+                        <span class="stat-lbl">Registered Sellers</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fa-solid fa-user-tag"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="admin-total-buyers">1</span>
+                        <span class="stat-lbl">Registered Buyers</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-table-card">
+                <div class="admin-table-header">
+                    <h3>Registered Platform Users (SQLite Database Query)</h3>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Email Address</th>
+                                <th>Role</th>
+                                <th>Registered Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Populated via API -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AUTH MODAL DIALOGUE -->
+    <div id="auth-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal">
+            <button class="modal-close" onclick="app.closeModal()">&times;</button>
+            
+            <div class="modal-tabs">
+                <button id="tab-login" class="tab-btn active" onclick="app.switchAuthTab('login')">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </button>
+                <button id="tab-register" class="tab-btn" onclick="app.switchAuthTab('register')">
+                    <i class="fa-solid fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="form-login" class="auth-form" onsubmit="app.submitLogin(event)">
+                <h3>Welcome Back to SaranyaMart</h3>
+                <p class="form-desc">Enter your credentials to access your account dashboard.</p>
+
+                <div class="form-group">
+                    <label for="login-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                    <input type="email" id="login-email" required placeholder="name@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password"><i class="fa-solid fa-key"></i> Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-login-submit">
+                    <span>Login to Account</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="form-register" class="auth-form hidden" onsubmit="app.submitRegister(event)">
+                <h3>Create New Account</h3>
+                <p class="form-desc">Join SaranyaMart today as a Buyer or Seller.</p>
+
+                <!-- Role Selection Switcher -->
+                <div class="role-selector-group">
+                    <label class="role-option">
+                        <input type="radio" name="register-role" value="buyer" checked onchange="app.updateRoleUI()">
+                        <div class="role-box">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <div>
+                                <strong>Buyer</strong>
+                                <span>Buy products</span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="register-role" value="seller" onchange="app.updateRoleUI()">
+                        <div class="role-box">
+                            <i class="fa-solid fa-store"></i>
+                            <div>
+                                <strong>Seller</strong>
+                                <span>Sell products</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-name"><i class="fa-solid fa-user"></i> Full Name / Store Name</label>
+                    <input type="text" id="register-name" required placeholder="e.g. Arun Kumar or Priya Electronics">
+                </div>
+
+                <div class="form-group">
+                    <label for="register-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                    <input type="email" id="register-email" required placeholder="user@domain.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password"><i class="fa-solid fa-key"></i> Password</label>
+                    <input type="password" id="register-password" required placeholder="At least 6 characters">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-register-submit">
+                    <span>Create SaranyaMart Account</span> <i class="fa-solid fa-circle-check"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 SaranyaMart E-Commerce Platform. Built with Java & SQLite.</p>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>

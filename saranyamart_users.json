@@ -1,0 +1,8 @@
+[
+  {"id":101,"fullName":"Admin User","email":"admin@saranyamart.com","passwordHash":"22fc4751220888a18cae46a8f40da0c1a8ae3992be6ce580cbeb40006645aa6b","role":"admin","createdAt":"2026-08-12 10:00:00"},
+  {"id":102,"fullName":"Priya Electronics","email":"seller@saranyamart.com","passwordHash":"11914b17aa9c59ccee5e1e13d606b93ec15d1a1938610df2a0e74a60a6f45e0a","role":"seller","createdAt":"2026-08-12 10:00:00"},
+  {"id":103,"fullName":"Arun Kumar","email":"buyer@saranyamart.com","passwordHash":"9761f9eecc0e4b9e1e418c3193dabba0195c9e382a7fab3f89ffcf0f113d9cae","role":"buyer","createdAt":"2026-08-12 10:00:00"},
+  {"id":104,"fullName":"Kavitha Sundaram","email":"kavitha@gmail.com","passwordHash":"81bbc4d1209866c1c75d6d3a0ac5c8ef7165a9bd1ed77a5d9cfcc3369bcca2da","role":"buyer","createdAt":"2026-08-12 19:00:00"},
+  {"id":105,"fullName":"saranya","email":"saranya123@gmail.com","passwordHash":"a33caa8173ff93e781b8072ac6ced9dc0c898c984901e1628644b9c21f7c16f7","role":"buyer","createdAt":"2026-08-12 19:02:47"},
+  {"id":106,"fullName":"saranya","email":"rssaranya123@gmail.com","passwordHash":"a33caa8173ff93e781b8072ac6ced9dc0c898c984901e1628644b9c21f7c16f7","role":"seller","createdAt":"2026-08-12 19:04:22"}
+]
