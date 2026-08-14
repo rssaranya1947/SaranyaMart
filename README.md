@@ -2,6 +2,8 @@
 
 **SaranyaMart** is an online shopping web application built **100% using Java**. It supports multi-role access for **Buyers**, **Sellers**, and **Admins**.
 
+**Repository Owner & Developer**: [rssaranya1947](https://github.com/rssaranya1947)
+
 ---
 
 ## 🚀 Week 1 Milestones Completed
@@ -20,7 +22,7 @@
 ## 🛠️ Technology Stack
 - **Backend Language**: Java (Java 17 JDK)
 - **HTTP Web Server**: Embedded Java HTTP Server (`com.sun.net.httpserver.HttpServer`)
-- **Database**: SQLite / JDBC (`org.xerial:sqlite-jdbc`)
+- **Database**: Pure Java Storage Engine & SQLite schema (`db/schema.sql`)
 - **Security**: SHA-256 password hashing with salt (`PasswordUtil`)
 - **Frontend**: HTML5, Vanilla CSS3 (Indigo & Emerald glassmorphism design system), JavaScript (Fetch API)
 
