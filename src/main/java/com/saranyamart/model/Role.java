@@ -1,7 +1,11 @@
 package com.saranyamart.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Enumeration representing the user roles in SaranyaMart.
+ * Uses Jackson annotations for seamless JSON serialization & deserialization.
  */
 public enum Role {
     BUYER("buyer"),
@@ -14,20 +18,22 @@ public enum Role {
         this.value = value;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }
 
     /**
-     * Parse string into Role enum value.
+     * Parse string into Role enum value for Jackson JSON deserialization.
      */
+    @JsonCreator
     public static Role fromString(String roleStr) {
-        if (roleStr == null) {
+        if (roleStr == null || roleStr.trim().isEmpty()) {
             return BUYER;
         }
-        String cleanRole = roleStr.trim().toLowerCase();
+        String cleanRole = roleStr.trim();
         for (Role r : Role.values()) {
-            if (r.value.equalsIgnoreCase(cleanRole)) {
+            if (r.value.equalsIgnoreCase(cleanRole) || r.name().equalsIgnoreCase(cleanRole)) {
                 return r;
             }
         }
