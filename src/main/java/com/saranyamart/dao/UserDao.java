@@ -40,7 +40,7 @@ public class UserDao {
             throw new IllegalArgumentException("User with email '" + request.getEmail() + "' already exists.");
         }
 
-        int newId = DatabaseManager.generateNextId();
+        int newId = DatabaseManager.generateNextUserId();
         String hashedPassword = PasswordUtil.hashPassword(request.getPassword());
         String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
@@ -48,7 +48,7 @@ public class UserDao {
         
         DatabaseManager.getUserMap().put(newId, newUser);
         DatabaseManager.getEmailIndex().put(cleanEmail, newId);
-        DatabaseManager.saveToDisk();
+        DatabaseManager.saveUsersToDisk();
 
         return newUser;
     }

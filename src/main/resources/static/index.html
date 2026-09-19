@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaranyaMart | Multi-Seller E-Commerce Marketplace</title>
+    <meta name="description" content="SaranyaMart - Premium online shopping platform where buyers find quality products, sellers grow businesses, and admins oversee marketplace excellence.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-logo" onclick="app.showHome()">
+                <div class="logo-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="logo-text">Saranya<span>Mart</span></div>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Search laptops, mobiles, electronics..." id="global-search" onkeyup="app.handleSearch(event)">
+                <button class="search-btn" onclick="app.loadCatalog()">Search</button>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="nav-actions" id="nav-actions">
+                <button class="btn btn-cart" id="btn-open-cart" onclick="app.openCartModal()">
+                    <i class="fa-solid fa-cart-shopping"></i> Cart
+                    <span class="cart-badge" id="cart-badge-count">0</span>
+                </button>
+                <button class="btn btn-outline" id="btn-login-modal" onclick="app.openModal('login')">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </button>
+                <button class="btn btn-primary" id="btn-register-modal" onclick="app.openModal('register')">
+                    <i class="fa-solid fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- Logged-In User Profile Info -->
+            <div class="user-profile-header hidden" id="user-profile-header">
+                <button class="btn btn-cart" onclick="app.openCartModal()">
+                    <i class="fa-solid fa-cart-shopping"></i> Cart
+                    <span class="cart-badge" id="cart-badge-count-user">0</span>
+                </button>
+                <div class="user-avatar" id="user-avatar-initial">U</div>
+                <div class="user-details">
+                    <span class="user-name" id="header-user-name">User</span>
+                    <span class="role-badge" id="header-user-role">Buyer</span>
+                </div>
+                <button class="btn btn-icon-logout" title="Logout" onclick="app.logout()">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Category Navigation Bar -->
+        <nav class="category-bar">
+            <div class="category-container">
+                <button class="cat-tab active" data-cat="all" onclick="app.selectCategory('all', this)"><i class="fa-solid fa-border-all"></i> All Products</button>
+                <button class="cat-tab" data-cat="Laptop" onclick="app.selectCategory('Laptop', this)"><i class="fa-solid fa-laptop"></i> Laptops</button>
+                <button class="cat-tab" data-cat="Mobile" onclick="app.selectCategory('Mobile', this)"><i class="fa-solid fa-mobile-screen"></i> Mobiles</button>
+                <button class="cat-tab" data-cat="Electronics" onclick="app.selectCategory('Electronics', this)"><i class="fa-solid fa-headphones"></i> Electronics</button>
+                <button class="cat-tab" data-cat="Fashion" onclick="app.selectCategory('Fashion', this)"><i class="fa-solid fa-shirt"></i> Fashion</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main View Container -->
+    <main class="main-content">
+        <!-- Home / Buyer Catalog Section -->
+        <section id="hero-view" class="hero-section">
+            <div class="hero-banner">
+                <div class="hero-text-content">
+                    <span class="hero-tag"><i class="fa-solid fa-sparkles"></i> SaranyaMart Multi-Seller Marketplace</span>
+                    <h1>Shop Laptops, Mobiles & Electronics</h1>
+                    <p>Verified sellers, guaranteed quality, and instant checkout.</p>
+                </div>
+                <!-- Quick Demo Logins Box -->
+                <div class="demo-credentials-card">
+                    <div class="demo-title"><i class="fa-solid fa-key"></i> Quick Demo Accounts</div>
+                    <div class="demo-chips">
+                        <button class="demo-chip" onclick="app.quickLogin('admin@saranyamart.com', 'Admin@123')">
+                            <span class="chip-role admin">Admin</span> admin@saranyamart.com
+                        </button>
+                        <button class="demo-chip" onclick="app.quickLogin('seller@saranyamart.com', 'Seller@123')">
+                            <span class="chip-role seller">Seller</span> seller@saranyamart.com
+                        </button>
+                        <button class="demo-chip" onclick="app.quickLogin('buyer@saranyamart.com', 'Buyer@123')">
+                            <span class="chip-role buyer">Buyer</span> buyer@saranyamart.com
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="section-header">
+                <h2><i class="fa-solid fa-boxes-stacked"></i> Featured Marketplace Products</h2>
+                <span class="product-count-label" id="catalog-count-label">Loading products...</span>
+            </div>
+            
+            <div class="product-grid" id="product-catalog-grid">
+                <!-- Dynamically populated via app.js -->
+            </div>
+        </section>
+
+        <!-- BUYER ORDERS VIEW -->
+        <section id="buyer-orders-view" class="dashboard-section hidden">
+            <div class="dashboard-header">
+                <div>
+                    <h2><i class="fa-solid fa-clock-rotate-left"></i> My Order History</h2>
+                    <p>Track your placed orders, status updates, and purchase summaries.</p>
+                </div>
+                <button class="btn btn-outline" onclick="app.showHome()">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Shopping
+                </button>
+            </div>
+
+            <div class="orders-list-container" id="buyer-orders-list">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- SELLER DASHBOARD VIEW (Week 3) -->
+        <section id="seller-dashboard" class="dashboard-section hidden">
+            <div class="dashboard-header">
+                <div>
+                    <h2><i class="fa-solid fa-store"></i> Seller Control Center</h2>
+                    <p>Manage your product listings, track store stock, and fulfill customer orders.</p>
+                </div>
+                <button class="btn btn-primary" onclick="app.openProductModal()">
+                    <i class="fa-solid fa-plus"></i> Add New Product
+                </button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon indigo"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="seller-stat-products">0</span>
+                        <span class="stat-lbl">My Listings</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon emerald"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="seller-stat-value">₹0</span>
+                        <span class="stat-lbl">Inventory Value</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="seller-stat-orders">0</span>
+                        <span class="stat-lbl">Orders Received</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seller Products Table -->
+            <div class="admin-table-card margin-bottom">
+                <div class="admin-table-header">
+                    <h3>My Product Inventory</h3>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Product Title</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seller-products-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Seller Orders Received Table -->
+            <div class="admin-table-card">
+                <div class="admin-table-header">
+                    <h3>Orders Received for My Products</h3>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer Name</th>
+                                <th>Items Purchased</th>
+                                <th>Total Amount</th>
+                                <th>Order Date</th>
+                                <th>Fulfillment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seller-orders-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN DASHBOARD VIEW (Week 4) -->
+        <section id="admin-dashboard" class="dashboard-section hidden">
+            <div class="dashboard-header">
+                <div>
+                    <h2><i class="fa-solid fa-shield-halved"></i> Admin Control Panel</h2>
+                    <p>Platform Supervision: Users, All Orders, and Product Moderation.</p>
+                </div>
+                <button class="btn btn-secondary" onclick="app.loadAdminData()">
+                    <i class="fa-solid fa-rotate"></i> Refresh Platform Metrics
+                </button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="admin-total-users">0</span>
+                        <span class="stat-lbl">Total Users</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon emerald"><i class="fa-solid fa-store"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="admin-total-sellers">0</span>
+                        <span class="stat-lbl">Sellers</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fa-solid fa-user-tag"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="admin-total-buyers">0</span>
+                        <span class="stat-lbl">Buyers</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber"><i class="fa-solid fa-cart-flatbed"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="admin-total-orders">0</span>
+                        <span class="stat-lbl">Total Orders</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Section Tabs -->
+            <div class="admin-table-card">
+                <div class="modal-tabs admin-tabs">
+                    <button class="tab-btn active" id="btn-admin-tab-users" onclick="app.switchAdminTab('users')"><i class="fa-solid fa-users"></i> Registered Users</button>
+                    <button class="tab-btn" id="btn-admin-tab-orders" onclick="app.switchAdminTab('orders')"><i class="fa-solid fa-boxes-packing"></i> All Orders</button>
+                    <button class="tab-btn" id="btn-admin-tab-products" onclick="app.switchAdminTab('products')"><i class="fa-solid fa-filter-circle-xmark"></i> Product Moderation</button>
+                </div>
+
+                <!-- Admin Users View -->
+                <div id="admin-tab-view-users" class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Registered Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-tbody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Admin Orders View -->
+                <div id="admin-tab-view-orders" class="table-container hidden">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Buyer Name</th>
+                                <th>Shipping Address</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Order Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-tbody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Admin Product Moderation View -->
+                <div id="admin-tab-view-products" class="table-container hidden">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Product Title</th>
+                                <th>Seller</th>
+                                <th>Price</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Moderation Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-products-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- SHOPPING CART MODAL (Week 2) -->
+    <div id="cart-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal cart-modal-content">
+            <button class="modal-close" onclick="app.closeCartModal()">&times;</button>
+            <h3><i class="fa-solid fa-cart-shopping"></i> Shopping Cart</h3>
+            <p class="form-desc">Review your selected items before placing order.</p>
+
+            <div class="cart-items-list" id="cart-items-container">
+                <!-- Cart items list dynamically inserted -->
+            </div>
+
+            <div class="cart-summary-card">
+                <div class="cart-subtotal-row">
+                    <span>Total Amount:</span>
+                    <strong class="cart-total-price" id="cart-total-display">₹0</strong>
+                </div>
+                <button class="btn btn-primary btn-block btn-lg" onclick="app.openCheckoutModal()">
+                    <span>Proceed to Checkout</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHECKOUT MODAL (Week 2) -->
+    <div id="checkout-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal">
+            <button class="modal-close" onclick="app.closeCheckoutModal()">&times;</button>
+            <h3><i class="fa-solid fa-file-invoice-dollar"></i> Checkout & Confirm Order</h3>
+            <p class="form-desc">No real payment required. Confirm shipping details below.</p>
+
+            <form id="form-checkout" onsubmit="app.submitCheckout(event)">
+                <div class="form-group">
+                    <label for="checkout-address"><i class="fa-solid fa-location-dot"></i> Delivery Shipping Address</label>
+                    <textarea id="checkout-address" required placeholder="Enter full address, city, pincode..." rows="3"></textarea>
+                </div>
+
+                <div class="checkout-summary-box">
+                    <div>Items Total: <strong id="checkout-total-price">₹0</strong></div>
+                    <div class="text-emerald"><i class="fa-solid fa-circle-check"></i> Free Shipping Applied</div>
+                </div>
+
+                <button type="submit" class="btn btn-secondary btn-block btn-lg" id="btn-confirm-order">
+                    <span>Confirm Order Now</span> <i class="fa-solid fa-circle-check"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SELLER ADD / EDIT PRODUCT MODAL (Week 3) -->
+    <div id="product-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal">
+            <button class="modal-close" onclick="app.closeProductModal()">&times;</button>
+            <h3 id="product-modal-title"><i class="fa-solid fa-plus"></i> Add New Product</h3>
+            <p class="form-desc">List a new product on SaranyaMart marketplace.</p>
+
+            <form id="form-product" onsubmit="app.submitProductForm(event)">
+                <input type="hidden" id="product-id">
+
+                <div class="form-group">
+                    <label for="product-title"><i class="fa-solid fa-tag"></i> Product Title</label>
+                    <input type="text" id="product-title" required placeholder="e.g. Dell XPS 15 Laptop">
+                </div>
+
+                <div class="form-group">
+                    <label for="product-category"><i class="fa-solid fa-list"></i> Category</label>
+                    <select id="product-category" required class="form-select">
+                        <option value="Laptop">Laptop</option>
+                        <option value="Mobile">Mobile</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Fashion">Fashion</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-price"><i class="fa-solid fa-indian-rupee-sign"></i> Price (₹)</label>
+                        <input type="number" id="product-price" required placeholder="e.g. 45000" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-stock"><i class="fa-solid fa-cubes"></i> Stock Quantity</label>
+                        <input type="number" id="product-stock" required placeholder="e.g. 10" min="1" value="10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-desc"><i class="fa-solid fa-align-left"></i> Description</label>
+                    <input type="text" id="product-desc" required placeholder="Product specifications, features...">
+                </div>
+
+                <div class="form-group">
+                    <label for="product-image"><i class="fa-solid fa-image"></i> Image URL</label>
+                    <input type="url" id="product-image" placeholder="https://images.unsplash.com/...">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-save-product">
+                    <span>Save Product Listing</span> <i class="fa-solid fa-check"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL DIALOGUE (Week 1) -->
+    <div id="auth-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal">
+            <button class="modal-close" onclick="app.closeModal()">&times;</button>
+            
+            <div class="modal-tabs">
+                <button id="tab-login" class="tab-btn active" onclick="app.switchAuthTab('login')">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </button>
+                <button id="tab-register" class="tab-btn" onclick="app.switchAuthTab('register')">
+                    <i class="fa-solid fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="form-login" class="auth-form" onsubmit="app.submitLogin(event)">
+                <h3>Welcome Back</h3>
+                <p class="form-desc">Enter your credentials to access your account dashboard.</p>
+
+                <div class="form-group">
+                    <label for="login-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                    <input type="email" id="login-email" required placeholder="name@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password"><i class="fa-solid fa-key"></i> Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-login-submit">
+                    <span>Login to Account</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="form-register" class="auth-form hidden" onsubmit="app.submitRegister(event)">
+                <h3>Create New Account</h3>
+                <p class="form-desc">Join SaranyaMart today as a Buyer or Seller.</p>
+
+                <div class="role-selector-group">
+                    <label class="role-option">
+                        <input type="radio" name="register-role" value="buyer" checked>
+                        <div class="role-box">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <div>
+                                <strong>Buyer</strong>
+                                <span>Buy products</span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="register-role" value="seller">
+                        <div class="role-box">
+                            <i class="fa-solid fa-store"></i>
+                            <div>
+                                <strong>Seller</strong>
+                                <span>Sell products</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-name"><i class="fa-solid fa-user"></i> Full Name / Store Name</label>
+                    <input type="text" id="register-name" required placeholder="e.g. Arun Kumar or Priya Electronics">
+                </div>
+
+                <div class="form-group">
+                    <label for="register-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                    <input type="email" id="register-email" required placeholder="user@domain.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password"><i class="fa-solid fa-key"></i> Password</label>
+                    <input type="password" id="register-password" required placeholder="At least 6 characters">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-register-submit">
+                    <span>Create SaranyaMart Account</span> <i class="fa-solid fa-circle-check"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 SaranyaMart E-Commerce Platform. Built with Spring Boot & Embedded Tomcat.</p>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>
