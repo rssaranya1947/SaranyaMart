@@ -115,6 +115,11 @@ public class DatabaseManager {
     public static Map<Integer, Message> getMessageMap() { return messageMap; }
     public static int generateNextMessageId() { return messageIdCounter.incrementAndGet(); }
 
+    public static boolean isDatabaseHealthy() {
+        return userMap != null && !userMap.isEmpty();
+    }
+
+
     // Seed Helpers
     private static void seedUserIfNotExists(String name, String email, String rawPassword, Role role) {
         String cleanEmail = email.trim().toLowerCase();
