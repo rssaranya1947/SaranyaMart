@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+buildCommand = "mvn -B clean package -DskipTests"
+
+[deploy]
+startCommand = "java -jar target/SaranyaMart-1.0.0-SNAPSHOT.jar"
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
