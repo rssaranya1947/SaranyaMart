@@ -706,7 +706,7 @@
         </div>
     </div>
 
-    <!-- AI CHATBOT FLOATING WIDGET (Week 9 Phase 3) -->
+    <!-- AI CHATBOT FLOATING WIDGET (Week 9 & 10 Phase 3) -->
     <div id="ai-chat-widget" class="ai-chat-widget">
         <!-- Chat Toggle Floating Action Button -->
         <button id="ai-chat-fab" class="ai-chat-fab" onclick="app.toggleChatbot()" title="SaranyaMart AI Shopping Assistant">
@@ -721,21 +721,26 @@
                     <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
                     <div>
                         <h4>SaranyaMart AI Assistant</h4>
-                        <span class="chat-status-badge"><i class="fa-solid fa-circle text-emerald"></i> Online • Market Support</span>
+                        <span class="chat-status-badge"><i class="fa-solid fa-circle text-emerald"></i> Online • <span id="chat-provider-pill" class="chat-provider-pill">Mock Mode</span></span>
                     </div>
                 </div>
-                <button class="chat-close-btn" onclick="app.toggleChatbot()">&times;</button>
+                <div class="chat-header-actions">
+                    <button class="chat-header-btn" onclick="app.clearChatHistory()" title="Clear Chat History"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button class="chat-close-btn" onclick="app.toggleChatbot()">&times;</button>
+                </div>
             </div>
 
             <div class="chat-panel-body" id="chat-messages-body">
                 <div class="chat-message bot">
                     <div class="msg-bubble">
-                        👋 Hi! I'm your <strong>SaranyaMart AI Assistant</strong>. How can I help you with products, shipping, returns, or coupons today?
+                        👋 Hi! I'm your <strong>SaranyaMart AI Assistant</strong>. Ask me anything about products, shipping, 7-day returns, or discount coupons!
                         <div class="msg-time">Just now</div>
                     </div>
                 </div>
                 <!-- Quick FAQ Suggestion Chips -->
                 <div class="chat-chips-container" id="chat-quick-chips">
+                    <button class="chat-chip" onclick="app.triggerCategoryFromChat('Laptop')">💻 Browse Laptops</button>
+                    <button class="chat-chip" onclick="app.triggerCategoryFromChat('Mobile')">📱 Browse Mobiles</button>
                     <button class="chat-chip" onclick="app.sendQuickChat('What is your return policy?')">🔄 Return Policy</button>
                     <button class="chat-chip" onclick="app.sendQuickChat('How long does shipping take?')">🚚 Shipping Info</button>
                     <button class="chat-chip" onclick="app.sendQuickChat('What payment methods are supported?')">💳 Payments</button>
@@ -759,6 +764,7 @@
             </form>
         </div>
     </div>
+
 
     <footer class="site-footer">
         <div class="footer-container">

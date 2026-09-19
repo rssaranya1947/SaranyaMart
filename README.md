@@ -31,6 +31,99 @@ flowchart TD
 
 ---
 
+## 🗄️ Database Design & ER Schema Specification (Section 4)
+
+```mermaid
+erDiagram
+    USERS {
+        int id PK
+        string name
+        string email UNIQUE
+        string password_hash
+        enum role "BUYER, SELLER, ADMIN"
+        timestamp created_at
+    }
+    PRODUCTS {
+        int id PK
+        int seller_id FK
+        string name
+        string description
+        decimal price
+        int stock_qty
+        string category
+        timestamp created_at
+    }
+    ORDERS {
+        int id PK
+        int buyer_id FK
+        enum status "PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED"
+        decimal total_amount
+        timestamp created_at
+    }
+    ORDER_ITEMS {
+        int id PK
+        int order_id FK
+        int product_id FK
+        int quantity
+        decimal unit_price
+    }
+    REVIEWS {
+        int id PK
+        int product_id FK
+        int user_id FK
+        int rating
+        string comment
+        timestamp created_at
+    }
+
+    USERS ||--o{ PRODUCTS : "lists"
+    USERS ||--o{ ORDERS : "places"
+    ORDERS ||--|{ ORDER_ITEMS : "contains"
+    PRODUCTS ||--o{ ORDER_ITEMS : "ordered_in"
+    USERS ||--o{ REVIEWS : "writes"
+    PRODUCTS ||--o{ REVIEWS : "receives"
+```
+
+---
+
+## 🧩 Required Design Patterns (Section 12 Specification)
+
+| Pattern | Implementation Location | Purpose & Architectural Usage |
+| :--- | :--- | :--- |
+| **DAO (Data Access Object)** | `com.saranyamart.dao.*` (`UserDao`, `ProductDao`, `OrderDao`, `ReviewDao`, `CouponDao`, `MessageDao`) | Abstraction separating business logic from direct data storage operations. |
+| **Front Controller** | `com.saranyamart.controller.*` (`AuthController`, `ProductController`, `OrderController`, `ChatController`, `HealthController`) | Centralized dispatch entry points orchestrating HTTP request processing, JSON mapping, and response envelopes. |
+| **Singleton** | `DatabaseManager` (`ServletContextListener` lifecycle) | Global thread-safe instance managing data persistence and ID sequence generation. |
+| **Factory** | `DatabaseManager` seeders & DAO instantiation | Instantiates data transfer objects, pre-seeded test accounts, and model entities. |
+| **Strategy Pattern** | `ChatProvider` (`MockChatProvider` vs. `GeminiChatProvider`) | Swappable AI chatbot provider strategy dispatched dynamically based on configuration property `ai.chatbot.provider`. |
+| **Builder Pattern** | `Order`, `Product`, `AuthResponse` DTO construction | Step-by-step construction of complex JSON response payloads and DTOs. |
+
+---
+
+## 🌐 API Contract Reference (Section 13 Specification)
+
+All API endpoints strictly follow the standard fixed envelope format:
+```json
+{
+  "success": true,
+  "data": { ... },
+  "error": null
+}
+```
+
+| Method | Endpoint | Description | Expected Status |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Authenticates user credentials & returns role session | `200 OK` / `401 Unauthorized` |
+| `POST` | `/api/auth/register` | Registers new Buyer or Seller user account | `201 Created` / `400 Bad Request` |
+| `GET` | `/api/products` | Lists marketplace products with search & category filters | `200 OK` |
+| `POST` | `/api/products` | Creates new seller product listing | `201 Created` / `400 Bad Request` |
+| `DELETE`| `/api/products/{id}` | Moderates/removes product listing (Admin/Seller) | `200 OK` / `403 Forbidden` |
+| `GET` | `/api/orders` | Retrieves buyer order history or seller incoming orders | `200 OK` |
+| `POST` | `/api/orders` | Places order from shopping cart contents | `201 Created` |
+| `POST` | `/api/chat` | AI Chatbot proxy endpoint (Section 11) | `200 OK` / `429 Rate Limited` |
+| `GET` | `/api/v1/health` | Health check endpoint returning `{"status":"UP","db":"UP"}` | `200 OK` |
+
+---
+
 ## 🛠️ Technology Stack Specification
 
 | Component | Specification |
@@ -44,11 +137,10 @@ flowchart TD
 | **View Layer** | HTML5 SPA, Vanilla CSS3 (Glassmorphic System), Vanilla JS (Fetch API) |
 | **Testing Framework** | JUnit 5 + Mockito (`mvn -B clean verify`) |
 | **CI / CD Pipeline** | GitHub Actions Workflow (`.github/workflows/build.yml`) |
-| **Observability** | Health Endpoint `GET /api/v1/health` returning `{"status":"UP","db":"UP"}` |
 
 ---
 
-## 🚀 Milestones Completed (Weeks 1 – 9)
+## 🚀 Milestones Completed (Weeks 1 – 10)
 
 - [x] **Week 1 – Project Skeleton & Database Schema**: Spring Boot project layout, Maven configuration, database initialization.
 - [x] **Week 2 – Authentication & User Roles**: Registration and login for Buyer, Seller, and Admin with password hashing.
@@ -63,20 +155,13 @@ flowchart TD
   - Implemented `SecurityFilter` enforcing security headers (`X-Frame-Options`, `X-Content-Type-Options`, `X-XSS-Protection`).
   - Implemented `GET /api/v1/health` health check endpoint per Section 18.
 - [x] **Week 9 – AI Chatbot Integration (Phase 3)**:
-  - Pluggable `ChatProvider` interface (`MockChatProvider` + `GeminiChatProvider`).
-  - Server-side REST API proxy controller (`POST /api/chat` & `POST /api/v1/chat`).
-  - Guardrails: Per-session rate limiting (10 msg/min), 300 character input cap, and in-memory question caching.
-  - Interactive floating AI Chatbot UI widget with quick suggestion chips, typing indicator, and auto-scroll.
-
----
-
-## 🛡️ Security & Observability Checklist
-
-- [x] **Query Parameterization**: Prepared statements and sanitized data access layer.
-- [x] **Password Hashing**: Salted bcrypt password hashing (`PasswordUtil`).
-- [x] **Security Headers**: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `X-XSS-Protection: 1; mode=block`.
-- [x] **Health Check Endpoint**: `GET /api/v1/health` returning `{"status": "UP", "db": "UP"}`.
-- [x] **CI Pipeline**: Automated build and test run on every git push (`mvn -B clean verify`).
+  - Pluggable `ChatProvider` interface architecture (`MockChatProvider` + `GeminiChatProvider`).
+  - Server-side REST API proxy controller (`/api/chat` & `/api/v1/chat`).
+  - Per-session rate limiting (10 msg/min), input length caps (300 chars), and in-memory question caching.
+- [x] **Week 10 – Chatbot Refinement, UI Polish & Architecture Specs**:
+  - Refined chatbot knowledge base and added interactive category trigger chips (e.g. clicking "Browse Laptops" filters main marketplace catalog!).
+  - Added active provider badge ("Mock Mode" / "Gemini AI") and clear chat history button.
+  - Documented Section 4 ER Diagram Schema, Section 12 Required Design Patterns, and Section 13 API Contract table.
 
 ---
 

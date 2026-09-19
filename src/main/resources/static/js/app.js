@@ -1520,7 +1520,7 @@ class SaranyaMartApp {
     }
 
     // ==========================================================================
-    // AI CHATBOT WIDGET CONTROLLER (Week 9 Phase 3)
+    // AI CHATBOT WIDGET CONTROLLER (Week 9 & 10 Phase 3)
     // ==========================================================================
     toggleChatbot() {
         const panel = document.getElementById('ai-chat-panel');
@@ -1540,6 +1540,39 @@ class SaranyaMartApp {
             input.value = questionText;
             this.submitChatMessage(new Event('submit'));
         }
+    }
+
+    triggerCategoryFromChat(categoryName) {
+        this.showHome();
+        const tabBtn = document.querySelector(`.cat-tab[data-cat="${categoryName}"]`);
+        if (tabBtn) {
+            this.selectCategory(categoryName, tabBtn);
+        }
+        this.renderChatMessage(`🔍 Filtering marketplace products for **${categoryName}**...`, 'bot');
+        this.showToast(`Catalog filtered by category: ${categoryName}`, 'success');
+    }
+
+    clearChatHistory() {
+        const body = document.getElementById('chat-messages-body');
+        if (!body) return;
+        
+        body.innerHTML = `
+            <div class="chat-message bot">
+                <div class="msg-bubble">
+                    👋 Hi! I'm your <strong>SaranyaMart AI Assistant</strong>. Conversation cleared. How can I help you?
+                    <div class="msg-time">Just now</div>
+                </div>
+            </div>
+            <div class="chat-chips-container" id="chat-quick-chips">
+                <button class="chat-chip" onclick="app.triggerCategoryFromChat('Laptop')">💻 Browse Laptops</button>
+                <button class="chat-chip" onclick="app.triggerCategoryFromChat('Mobile')">📱 Browse Mobiles</button>
+                <button class="chat-chip" onclick="app.sendQuickChat('What is your return policy?')">🔄 Return Policy</button>
+                <button class="chat-chip" onclick="app.sendQuickChat('How long does shipping take?')">🚚 Shipping Info</button>
+                <button class="chat-chip" onclick="app.sendQuickChat('What payment methods are supported?')">💳 Payments</button>
+                <button class="chat-chip" onclick="app.sendQuickChat('How do I apply a coupon code?')">🎟️ Promo Coupons</button>
+            </div>
+        `;
+        this.showToast('Chat history reset.', 'info');
     }
 
     async submitChatMessage(event) {
@@ -1575,6 +1608,11 @@ class SaranyaMartApp {
 
             if (data.success && (data.reply || (data.data && data.data.reply))) {
                 const reply = data.reply || data.data.reply;
+                const provider = (data.data && data.data.provider) ? data.data.provider : 'mock';
+                
+                const pill = document.getElementById('chat-provider-pill');
+                if (pill) pill.textContent = provider.toUpperCase() === 'GEMINI' ? 'Gemini AI' : 'Mock Mode';
+
                 this.renderChatMessage(reply, 'bot');
             } else if (data.error && data.error.message) {
                 this.renderChatMessage(`⚠️ ${data.error.message}`, 'bot');
@@ -1618,6 +1656,7 @@ class SaranyaMartApp {
         }
     }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
