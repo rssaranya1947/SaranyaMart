@@ -1,6 +1,7 @@
 package com.saranyamart.db;
 
 import com.saranyamart.model.Coupon;
+import com.saranyamart.model.Message;
 import com.saranyamart.model.Order;
 import com.saranyamart.model.OrderItem;
 import com.saranyamart.model.Product;
@@ -22,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Pure Java Storage Engine for SaranyaMart.
- * Thread-safe in-memory data store with file persistence for Users, Products, Orders, Reviews, and Coupons.
+ * Thread-safe in-memory data store with file persistence for Users, Products, Orders, Reviews, Coupons, and Messages.
  */
 public class DatabaseManager {
 
@@ -30,6 +31,7 @@ public class DatabaseManager {
     private static final String PRODUCTS_FILE = "saranyamart_products.json";
     private static final String ORDERS_FILE = "saranyamart_orders.json";
     private static final String REVIEWS_FILE = "saranyamart_reviews.json";
+    private static final String MESSAGES_FILE = "saranyamart_messages.json";
 
     private static final Map<Integer, User> userMap = new ConcurrentHashMap<>();
     private static final Map<String, Integer> emailIndex = new ConcurrentHashMap<>();
@@ -46,14 +48,18 @@ public class DatabaseManager {
 
     private static final Map<String, Coupon> couponMap = new ConcurrentHashMap<>();
 
+    private static final Map<Integer, Message> messageMap = new ConcurrentHashMap<>();
+    private static final AtomicInteger messageIdCounter = new AtomicInteger(2000);
+
     public static synchronized void initializeDatabase() {
         System.out.println("[DatabaseManager] Initializing Pure Java Storage Engine...");
 
-        // Load users, products, orders, reviews from disk if present
+        // Load data from disk if present
         loadUsersFromDisk();
         loadProductsFromDisk();
         loadOrdersFromDisk();
         loadReviewsFromDisk();
+        loadMessagesFromDisk();
 
         // Seed default users if missing
         seedUserIfNotExists("Admin User", "admin@saranyamart.com", "Admin@123", Role.ADMIN);
@@ -72,6 +78,9 @@ public class DatabaseManager {
         // Seed sample coupons if empty
         seedCouponsIfEmpty();
 
+        // Seed sample messages if empty
+        seedSampleMessagesIfEmpty();
+
         // Recalculate average ratings for all products based on reviews
         recalculateProductRatingStats();
 
@@ -79,10 +88,12 @@ public class DatabaseManager {
         saveProductsToDisk();
         saveOrdersToDisk();
         saveReviewsToDisk();
+        saveMessagesToDisk();
 
         System.out.println("[DatabaseManager] Initialization complete! Users: " + userMap.size() 
                            + ", Products: " + productMap.size() + ", Orders: " + orderMap.size()
-                           + ", Reviews: " + reviewMap.size() + ", Coupons: " + couponMap.size());
+                           + ", Reviews: " + reviewMap.size() + ", Coupons: " + couponMap.size()
+                           + ", Messages: " + messageMap.size());
     }
 
     // Getters for Maps and ID Generators
@@ -100,6 +111,9 @@ public class DatabaseManager {
     public static int generateNextReviewId() { return reviewIdCounter.incrementAndGet(); }
 
     public static Map<String, Coupon> getCouponMap() { return couponMap; }
+
+    public static Map<Integer, Message> getMessageMap() { return messageMap; }
+    public static int generateNextMessageId() { return messageIdCounter.incrementAndGet(); }
 
     // Seed Helpers
     private static void seedUserIfNotExists(String name, String email, String rawPassword, Role role) {
@@ -119,7 +133,7 @@ public class DatabaseManager {
             productMap.put(p1, new Product(p1, "High Performance Laptop", "15.6 inch FHD, Intel i7, 16GB RAM, 512GB SSD", 45000.00, "Laptop", "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500", 102, "Priya Electronics", 15, "active", "2026-08-12 10:00:00"));
 
             int p2 = generateNextProductId();
-            productMap.put(p2, new Product(p2, "Smart Mobile 5G", "6.7 inch AMOLED, 128GB Storage, 50MP Camera", 18000.00, "Mobile", "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500", 102, "Priya Electronics", 25, "active", "2026-08-12 10:00:00"));
+            productMap.put(p2, new Product(p2, "Smart Mobile 5G", "6.7 inch AMOLED, 128GB Storage, 50MP Camera", 18000.00, "Mobile", "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500", 102, "Priya Electronics", 4, "active", "2026-08-12 10:00:00"));
 
             int p3 = generateNextProductId();
             productMap.put(p3, new Product(p3, "Noise Cancelling Headphones", "Wireless Over-Ear Bluetooth Headphones with HD Mic", 2500.00, "Electronics", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500", 102, "Priya Electronics", 30, "active", "2026-08-12 10:00:00"));
@@ -159,6 +173,16 @@ public class DatabaseManager {
         }
     }
 
+    private static void seedSampleMessagesIfEmpty() {
+        if (messageMap.isEmpty()) {
+            int m1 = generateNextMessageId();
+            messageMap.put(m1, new Message(m1, 103, "Arun Kumar", 102, "Priya Electronics", 201, "High Performance Laptop", "Hi, does this laptop come with manufacturer warranty?", "2026-08-17 10:15:00"));
+
+            int m2 = generateNextMessageId();
+            messageMap.put(m2, new Message(m2, 102, "Priya Electronics", 103, "Arun Kumar", 201, "High Performance Laptop", "Yes! It comes with 1 Year Onsite Warranty.", "2026-08-17 10:30:00"));
+        }
+    }
+
     private static void recalculateProductRatingStats() {
         for (Product product : productMap.values()) {
             List<Review> pReviews = new ArrayList<>();
@@ -193,6 +217,10 @@ public class DatabaseManager {
 
     public static synchronized void saveReviewsToDisk() {
         saveJson(REVIEWS_FILE, serializeReviews());
+    }
+
+    public static synchronized void saveMessagesToDisk() {
+        saveJson(MESSAGES_FILE, serializeMessages());
     }
 
     private static void saveJson(String filename, String jsonContent) {
@@ -295,6 +323,36 @@ public class DatabaseManager {
         }
     }
 
+    private static void loadMessagesFromDisk() {
+        File f = new File(MESSAGES_FILE);
+        if (!f.exists()) return;
+        try {
+            String content = Files.readString(f.toPath(), StandardCharsets.UTF_8);
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile("\\{[^}]*\\}");
+            java.util.regex.Matcher m = p.matcher(content);
+            int maxId = 2000;
+            while (m.find()) {
+                String b = m.group();
+                int id = Integer.parseInt(extract(b, "id", "2000"));
+                int senderId = Integer.parseInt(extract(b, "senderId", "103"));
+                String senderName = extract(b, "senderName", "Sender");
+                int recipientId = Integer.parseInt(extract(b, "recipientId", "102"));
+                String recipientName = extract(b, "recipientName", "Recipient");
+                int productId = Integer.parseInt(extract(b, "productId", "201"));
+                String productTitle = extract(b, "productTitle", "Product");
+                String messageText = extract(b, "messageText", "");
+                String created = extract(b, "createdAt", "2026-08-17");
+
+                Message msg = new Message(id, senderId, senderName, recipientId, recipientName, productId, productTitle, messageText, created);
+                messageMap.put(id, msg);
+                if (id > maxId) maxId = id;
+            }
+            messageIdCounter.set(maxId);
+        } catch (Exception e) {
+            System.err.println("[DatabaseManager] Warning loading messages: " + e.getMessage());
+        }
+    }
+
     private static String serializeUsers() {
         StringBuilder json = new StringBuilder("[\n");
         List<User> list = new ArrayList<>(userMap.values());
@@ -368,6 +426,27 @@ public class DatabaseManager {
                 .append(",\"rating\":").append(r.getRating())
                 .append(",\"comment\":\"").append(esc(r.getComment())).append("\"")
                 .append(",\"createdAt\":\"").append(esc(r.getCreatedAt())).append("\"}");
+            if (i < list.size() - 1) json.append(",");
+            json.append("\n");
+        }
+        json.append("]");
+        return json.toString();
+    }
+
+    private static String serializeMessages() {
+        StringBuilder json = new StringBuilder("[\n");
+        List<Message> list = new ArrayList<>(messageMap.values());
+        for (int i = 0; i < list.size(); i++) {
+            Message m = list.get(i);
+            json.append("  {\"id\":").append(m.getId())
+                .append(",\"senderId\":").append(m.getSenderId())
+                .append(",\"senderName\":\"").append(esc(m.getSenderName())).append("\"")
+                .append(",\"recipientId\":").append(m.getRecipientId())
+                .append(",\"recipientName\":\"").append(esc(m.getRecipientName())).append("\"")
+                .append(",\"productId\":").append(m.getProductId())
+                .append(",\"productTitle\":\"").append(esc(m.getProductTitle())).append("\"")
+                .append(",\"messageText\":\"").append(esc(m.getMessageText())).append("\"")
+                .append(",\"createdAt\":\"").append(esc(m.getCreatedAt())).append("\"}");
             if (i < list.size() - 1) json.append(",");
             json.append("\n");
         }

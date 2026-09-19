@@ -1,5 +1,5 @@
 /**
- * SaranyaMart Client-Side Web Engine - Weeks 1 to 6 Complete
+ * SaranyaMart Client-Side Web Engine - Weeks 1 to 7 Complete
  */
 class SaranyaMartApp {
     constructor() {
@@ -15,22 +15,26 @@ class SaranyaMartApp {
         this.allProducts = [];
         this.activeReviewProduct = null;
         
-        // Week 6 Multi-Currency & Coupon State
+        // Multi-Currency & Coupon State
         this.currency = 'INR';
         this.rates = { INR: 1.0, USD: 0.012, EUR: 0.011 };
         this.symbols = { INR: '₹', USD: '$', EUR: '€' };
         this.appliedCoupon = null;
 
+        // Theme State (Week 7)
+        this.theme = 'dark';
+
         this.init();
     }
 
     init() {
-        // Load user session, cart, wishlist, and currency from localStorage
+        // Load session, cart, wishlist, currency, and theme from localStorage
         const savedUser = localStorage.getItem('sm_user');
         const savedToken = localStorage.getItem('sm_token');
         const savedCart = localStorage.getItem('sm_cart');
         const savedWishlist = localStorage.getItem('sm_wishlist');
         const savedCurrency = localStorage.getItem('sm_currency');
+        const savedTheme = localStorage.getItem('sm_theme');
 
         if (savedUser && savedToken) {
             try {
@@ -58,6 +62,10 @@ class SaranyaMartApp {
             if (sel2) sel2.value = savedCurrency;
         }
 
+        if (savedTheme === 'light') {
+            this.setTheme('light');
+        }
+
         this.updateCartBadge();
         this.updateWishlistBadge();
         this.loadCatalog();
@@ -66,7 +74,30 @@ class SaranyaMartApp {
         }
     }
 
-    // WEEK 6: MULTI-CURRENCY CONVERSION HELPER
+    // WEEK 7: DARK / LIGHT THEME TOGGLE
+    toggleTheme() {
+        const newTheme = this.theme === 'dark' ? 'light' : 'dark';
+        this.setTheme(newTheme);
+    }
+
+    setTheme(t) {
+        this.theme = t;
+        localStorage.setItem('sm_theme', t);
+        const btn1 = document.getElementById('btn-theme-toggle');
+        const btn2 = document.getElementById('btn-theme-toggle-user');
+        const iconHtml = t === 'light' ? '<i class="fa-solid fa-sun text-amber"></i>' : '<i class="fa-solid fa-moon"></i>';
+
+        if (btn1) btn1.innerHTML = iconHtml;
+        if (btn2) btn2.innerHTML = iconHtml;
+
+        if (t === 'light') {
+            document.body.classList.add('light-theme');
+        } else {
+            document.body.classList.remove('light-theme');
+        }
+    }
+
+    // MULTI-CURRENCY CONVERSION HELPER
     formatPrice(amountInINR) {
         if (amountInINR === null || amountInINR === undefined) return '₹0';
         const rate = this.rates[this.currency] || 1.0;
@@ -255,7 +286,7 @@ class SaranyaMartApp {
         }
     }
 
-    // WEEK 2 & 5: PRODUCT CATALOG & FILTERS
+    // PRODUCT CATALOG & FILTERS
     async loadCatalog() {
         const grid = document.getElementById('product-catalog-grid');
         grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; padding: 2rem;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Loading Products...</p></div>';
@@ -355,7 +386,7 @@ class SaranyaMartApp {
                     <p class="product-desc">${p.description || 'Quality product from verified seller.'}</p>
                     <div class="product-meta">
                         <span class="product-price">${priceFormatted}</span>
-                        <span class="seller-chip"><i class="fa-solid fa-store"></i> ${p.sellerName}</span>
+                        <span class="seller-chip" onclick="app.openSellerStoreModal(${p.sellerId}, '${p.sellerName}')"><i class="fa-solid fa-store"></i> ${p.sellerName}</span>
                     </div>
                     <button class="btn btn-primary btn-block" onclick="app.addToCart(${p.id})">
                         <i class="fa-solid fa-cart-plus"></i> Add to Cart
@@ -364,6 +395,158 @@ class SaranyaMartApp {
             `;
             grid.appendChild(card);
         });
+    }
+
+    // WEEK 7: SELLER STOREFRONT MODAL
+    async openSellerStoreModal(sellerId, sellerName) {
+        const modal = document.getElementById('seller-store-modal');
+        const body = document.getElementById('seller-store-body');
+        body.innerHTML = '<p class="text-center"><i class="fa-solid fa-spinner fa-spin"></i> Loading Seller Storefront...</p>';
+        modal.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`/api/products/seller/${sellerId}`);
+            const data = await res.json();
+
+            if (data.success && data.products) {
+                let itemsHtml = '';
+                data.products.forEach(p => {
+                    itemsHtml += `
+                        <div class="cart-item-row" style="margin-bottom:0.75rem;">
+                            <img src="${p.imageUrl}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                            <div class="cart-item-info">
+                                <div class="cart-item-title">${p.title}</div>
+                                <div class="cart-item-price">${this.formatPrice(p.price)}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-star text-amber"></i> ${p.averageRating ? p.averageRating.toFixed(1) : '5.0'} (${p.reviewCount || 0} reviews)</div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="app.addToCart(${p.id}); app.closeSellerStoreModal();"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
+                        </div>
+                    `;
+                });
+
+                body.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem;">
+                        <div class="user-avatar" style="width:54px; height:54px; font-size:1.5rem;">${sellerName.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <h2>${sellerName} Storefront</h2>
+                            <p style="color:var(--text-muted); font-size:0.88rem;"><i class="fa-solid fa-certificate text-emerald"></i> Verified Seller | ${data.products.length} Products Listed</p>
+                        </div>
+                    </div>
+                    <hr class="modal-divider">
+                    <h4 style="margin-bottom:1rem;"><i class="fa-solid fa-boxes-stacked"></i> Products by ${sellerName}</h4>
+                    <div>${itemsHtml || '<p>No products listed by this seller yet.</p>'}</div>
+                `;
+            }
+        } catch (e) {
+            body.innerHTML = '<p style="color:#ef4444;">Failed to load seller storefront.</p>';
+        }
+    }
+
+    closeSellerStoreModal() {
+        document.getElementById('seller-store-modal').classList.add('hidden');
+    }
+
+    // WEEK 7: BUYER-SELLER MESSAGING & INQUIRIES
+    openSendMessageFromDetail() {
+        if (!this.activeReviewProduct) return;
+        this.closeReviewModal();
+        this.openSendMessageModal(this.activeReviewProduct);
+    }
+
+    openSendMessageModal(product) {
+        if (!this.currentUser) {
+            this.openModal('login');
+            this.showToast('Please login as Buyer to ask seller a question.', 'info');
+            return;
+        }
+
+        document.getElementById('msg-product-id').value = product.id;
+        document.getElementById('msg-seller-id').value = product.sellerId;
+        document.getElementById('msg-seller-name').value = product.sellerName;
+        document.getElementById('send-message-desc').textContent = `Inquire directly about "${product.title}" to ${product.sellerName}.`;
+        document.getElementById('msg-text').value = '';
+
+        document.getElementById('send-message-modal').classList.remove('hidden');
+    }
+
+    closeSendMessageModal() {
+        document.getElementById('send-message-modal').classList.add('hidden');
+    }
+
+    async submitMessageInquiry(event) {
+        event.preventDefault();
+        const productId = parseInt(document.getElementById('msg-product-id').value);
+        const recipientId = parseInt(document.getElementById('msg-seller-id').value);
+        const recipientName = document.getElementById('msg-seller-name').value;
+        const messageText = document.getElementById('msg-text').value.trim();
+
+        const product = this.allProducts.find(p => p.id === productId);
+
+        const payload = {
+            senderId: this.currentUser.id,
+            senderName: this.currentUser.fullName,
+            recipientId: recipientId,
+            recipientName: recipientName,
+            productId: productId,
+            productTitle: product ? product.title : 'Product Inquiry',
+            messageText: messageText
+        };
+
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+
+            if (response.ok && data.id) {
+                this.showToast('Inquiry sent to seller successfully!', 'success');
+                this.closeSendMessageModal();
+            } else {
+                this.showToast(data.message || 'Error sending message.', 'error');
+            }
+        } catch (e) {
+            this.showToast('Server error sending message.', 'error');
+        }
+    }
+
+    async openInboxModal() {
+        if (!this.currentUser) return;
+        const list = document.getElementById('inbox-messages-list');
+        list.innerHTML = '<p class="text-center"><i class="fa-solid fa-spinner fa-spin"></i> Loading Inbox Messages...</p>';
+        document.getElementById('messages-modal').classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/messages/user/${this.currentUser.id}`);
+            const messages = await response.json();
+
+            list.innerHTML = '';
+            if (!messages || messages.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">Your inbox is empty. No messages yet.</p>';
+                return;
+            }
+
+            messages.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                card.innerHTML = `
+                    <div class="review-header">
+                        <span class="review-author"><i class="fa-solid fa-circle-user"></i> ${m.senderName} ➔ ${m.recipientName}</span>
+                        <span class="review-date">${m.createdAt || 'Recent'}</span>
+                    </div>
+                    <div style="font-size:0.8rem; color:#818cf8; font-weight:700; margin-bottom:0.35rem;">Re: ${m.productTitle}</div>
+                    <div class="review-text">${m.messageText}</div>
+                `;
+                list.appendChild(card);
+            });
+        } catch (e) {
+            list.innerHTML = '<p style="color:#ef4444;">Failed to load messages inbox.</p>';
+        }
+    }
+
+    closeInboxModal() {
+        document.getElementById('messages-modal').classList.add('hidden');
     }
 
     // WISHLIST ENGINE
@@ -551,7 +734,7 @@ class SaranyaMartApp {
         });
     }
 
-    // SHOPPING CART & PROMO COUPONS (Week 6)
+    // SHOPPING CART & PROMO COUPONS
     addToCart(productId) {
         const product = this.allProducts.find(p => p.id === productId);
         if (!product) return;
@@ -775,7 +958,6 @@ class SaranyaMartApp {
                 this.updateCartBadge();
                 this.closeCheckoutModal();
                 
-                // Open Printable Invoice automatically
                 if (newOrder) {
                     this.openInvoiceModal(newOrder);
                 } else {
@@ -792,7 +974,7 @@ class SaranyaMartApp {
         }
     }
 
-    // BUYER ORDER HISTORY & PRINTABLE INVOICE (Week 6)
+    // BUYER ORDER HISTORY & PRINTABLE INVOICE
     async showBuyerOrders() {
         if (!this.currentUser) return;
         this.showView('buyer-orders-view');
@@ -941,7 +1123,7 @@ class SaranyaMartApp {
         }
     }
 
-    // SELLER DASHBOARD ENGINE
+    // SELLER DASHBOARD ENGINE & LOW STOCK RESTOCK (Week 7)
     async loadSellerDashboard() {
         if (!this.currentUser) return;
 
@@ -956,15 +1138,20 @@ class SaranyaMartApp {
 
                 prodData.products.forEach(p => {
                     totalValue += (p.price * p.stockQuantity);
+                    const isLowStock = p.stockQuantity < 5;
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>#${p.id}</td>
                         <td><strong>${p.title}</strong></td>
                         <td>${p.category}</td>
                         <td class="text-emerald">${this.formatPrice(p.price)}</td>
-                        <td>${p.stockQuantity} pcs</td>
+                        <td>
+                            ${p.stockQuantity} pcs
+                            ${isLowStock ? '<span class="badge-low-stock" style="margin-left:0.4rem;">Low Stock</span>' : ''}
+                        </td>
                         <td><i class="fa-solid fa-star text-amber"></i> ${p.averageRating ? p.averageRating.toFixed(1) : '5.0'} (${p.reviewCount || 0})</td>
                         <td>
+                            <button class="btn btn-secondary btn-sm" title="Quick Restock +10" onclick="app.quickRestockSeller(${p.id})"><i class="fa-solid fa-cubes-stacked"></i> +10 Stock</button>
                             <button class="btn btn-outline btn-sm" onclick="app.openProductModal(${p.id})"><i class="fa-solid fa-pen"></i> Edit</button>
                             <button class="btn btn-danger btn-sm" onclick="app.deleteProductSeller(${p.id})"><i class="fa-solid fa-trash"></i></button>
                         </td>
@@ -1006,6 +1193,30 @@ class SaranyaMartApp {
             }
         } catch (e) {
             console.error('Seller Dashboard Load Error:', e);
+        }
+    }
+
+    async quickRestockSeller(productId) {
+        const prod = this.allProducts.find(p => p.id === productId);
+        if (!prod) return;
+
+        const newStock = prod.stockQuantity + 10;
+        const payload = { ...prod, stockQuantity: newStock };
+
+        try {
+            const response = await fetch(`/api/products/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (data.success) {
+                this.showToast(`Restocked "${prod.title}"! New stock: ${newStock} pcs`, 'success');
+                this.loadCatalog();
+                this.loadSellerDashboard();
+            }
+        } catch (e) {
+            this.showToast('Error restocking inventory.', 'error');
         }
     }
 
@@ -1108,7 +1319,7 @@ class SaranyaMartApp {
         }
     }
 
-    // ADMIN DASHBOARD & CSV REPORT EXPORT (Week 6)
+    // ADMIN DASHBOARD & CSV REPORT EXPORT
     async loadAdminData() {
         try {
             const userRes = await fetch('/api/users');

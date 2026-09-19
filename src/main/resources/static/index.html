@@ -33,8 +33,11 @@
                 <button class="search-btn" onclick="app.loadCatalog()">Search</button>
             </div>
 
-            <!-- Header Action Controls & Currency Selector -->
+            <!-- Header Action Controls & Currency Selector & Theme Toggle -->
             <div class="nav-actions" id="nav-actions">
+                <button class="btn btn-outline btn-sm theme-toggle-btn" onclick="app.toggleTheme()" title="Toggle Dark/Light Mode" id="btn-theme-toggle">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
                 <div class="currency-selector-box">
                     <select id="currency-select" class="form-select form-select-sm" onchange="app.changeCurrency(this.value)">
                         <option value="INR" selected>₹ INR</option>
@@ -60,6 +63,9 @@
 
             <!-- Logged-In User Profile Info -->
             <div class="user-profile-header hidden" id="user-profile-header">
+                <button class="btn btn-outline btn-sm theme-toggle-btn" onclick="app.toggleTheme()" title="Toggle Dark/Light Mode" id="btn-theme-toggle-user">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
                 <div class="currency-selector-box">
                     <select id="currency-select-user" class="form-select form-select-sm" onchange="app.changeCurrency(this.value)">
                         <option value="INR" selected>₹ INR</option>
@@ -67,6 +73,9 @@
                         <option value="EUR">€ EUR</option>
                     </select>
                 </div>
+                <button class="btn btn-cart" onclick="app.openInboxModal()" title="Inquiries Inbox">
+                    <i class="fa-solid fa-envelope"></i> Inbox
+                </button>
                 <button class="btn btn-cart" onclick="app.openWishlistModal()">
                     <i class="fa-solid fa-heart text-danger"></i> Wishlist
                     <span class="cart-badge" id="wishlist-badge-count-user">0</span>
@@ -106,7 +115,7 @@
                 <div class="hero-text-content">
                     <span class="hero-tag"><i class="fa-solid fa-sparkles"></i> SaranyaMart Multi-Seller Marketplace</span>
                     <h1>Shop Laptops, Mobiles & Electronics</h1>
-                    <p>Verified sellers, 5-star buyer ratings, promo coupons, and instant checkout.</p>
+                    <p>Verified sellers, seller storefronts, product inquiries, and instant checkout.</p>
                 </div>
                 <!-- Quick Demo Logins Box -->
                 <div class="demo-credentials-card">
@@ -125,7 +134,7 @@
                 </div>
             </div>
 
-            <!-- Product Filter & Sorting Controls (Week 5) -->
+            <!-- Product Filter & Sorting Controls -->
             <div class="filter-sort-bar margin-bottom">
                 <div class="filter-inputs">
                     <span class="filter-label"><i class="fa-solid fa-filter"></i> Price Range:</span>
@@ -174,16 +183,17 @@
             </div>
         </section>
 
-        <!-- SELLER DASHBOARD VIEW (Weeks 3 & 5) -->
+        <!-- SELLER DASHBOARD VIEW -->
         <section id="seller-dashboard" class="dashboard-section hidden">
             <div class="dashboard-header">
                 <div>
                     <h2><i class="fa-solid fa-store"></i> Seller Control Center</h2>
-                    <p>Manage product listings, monitor store inventory, and fulfill customer orders.</p>
+                    <p>Manage product listings, monitor store inventory alerts, and fulfill customer orders.</p>
                 </div>
-                <button class="btn btn-primary" onclick="app.openProductModal()">
-                    <i class="fa-solid fa-plus"></i> Add New Product
-                </button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="btn btn-outline" onclick="app.openInboxModal()"><i class="fa-solid fa-envelope"></i> Messages Inbox</button>
+                    <button class="btn btn-primary" onclick="app.openProductModal()"><i class="fa-solid fa-plus"></i> Add Product</button>
+                </div>
             </div>
 
             <div class="stats-row">
@@ -260,7 +270,7 @@
             </div>
         </section>
 
-        <!-- ADMIN DASHBOARD VIEW (Weeks 4, 5 & 6) -->
+        <!-- ADMIN DASHBOARD VIEW -->
         <section id="admin-dashboard" class="dashboard-section hidden">
             <div class="dashboard-header">
                 <div>
@@ -367,6 +377,53 @@
         </section>
     </main>
 
+    <!-- SELLER STOREFRONT MODAL (Week 7) -->
+    <div id="seller-store-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal store-modal-content">
+            <button class="modal-close" onclick="app.closeSellerStoreModal()">&times;</button>
+            <div id="seller-store-body">
+                <!-- Dynamically populated seller store page -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MESSAGES INBOX MODAL (Week 7) -->
+    <div id="messages-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal review-modal-content">
+            <button class="modal-close" onclick="app.closeInboxModal()">&times;</button>
+            <h3><i class="fa-solid fa-envelope"></i> Product Inquiry Messages</h3>
+            <p class="form-desc">In-app direct inquiries between Buyers and Sellers.</p>
+            
+            <div id="inbox-messages-list" class="reviews-list-container" style="max-height: 350px;">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SEND MESSAGE INQUIRY MODAL (Week 7) -->
+    <div id="send-message-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal">
+            <button class="modal-close" onclick="app.closeSendMessageModal()">&times;</button>
+            <h3><i class="fa-solid fa-paper-plane"></i> Ask Seller a Question</h3>
+            <p class="form-desc" id="send-message-desc">Inquire directly about this product.</p>
+
+            <form id="form-send-message" onsubmit="app.submitMessageInquiry(event)">
+                <input type="hidden" id="msg-product-id">
+                <input type="hidden" id="msg-seller-id">
+                <input type="hidden" id="msg-seller-name">
+
+                <div class="form-group">
+                    <label for="msg-text">Your Question / Inquiry Message:</label>
+                    <textarea id="msg-text" required placeholder="Ask about specifications, warranty, delivery times..." rows="4"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span>Send Inquiry to Seller</span> <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- PRINTABLE ORDER INVOICE MODAL (Week 6) -->
     <div id="invoice-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal invoice-modal-content">
@@ -393,13 +450,17 @@
         </div>
     </div>
 
-    <!-- PRODUCT DETAILS & REVIEWS MODAL (Week 5) -->
+    <!-- PRODUCT DETAILS & REVIEWS MODAL (Week 5 & 7) -->
     <div id="review-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal review-modal-content">
             <button class="modal-close" onclick="app.closeReviewModal()">&times;</button>
             
             <div class="product-detail-hero" id="review-product-hero">
                 <!-- Dynamically populated product preview -->
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:0.75rem;">
+                <button class="btn btn-outline btn-sm" onclick="app.openSendMessageFromDetail()"><i class="fa-solid fa-comment-dots"></i> Ask Seller a Question</button>
             </div>
 
             <hr class="modal-divider">
@@ -443,7 +504,7 @@
         </div>
     </div>
 
-    <!-- SHOPPING CART MODAL (Weeks 2 & 6 Promo Code) -->
+    <!-- SHOPPING CART MODAL -->
     <div id="cart-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal cart-modal-content">
             <button class="modal-close" onclick="app.closeCartModal()">&times;</button>
@@ -454,7 +515,7 @@
                 <!-- Cart items list dynamically inserted -->
             </div>
 
-            <!-- Promo Code Coupon Entry (Week 6) -->
+            <!-- Promo Code Coupon Entry -->
             <div class="coupon-box margin-bottom">
                 <div class="form-group" style="margin-bottom:0.5rem;">
                     <label for="cart-coupon-input"><i class="fa-solid fa-ticket text-amber"></i> Apply Discount Promo Code:</label>
@@ -482,7 +543,7 @@
         </div>
     </div>
 
-    <!-- CHECKOUT MODAL (Weeks 2 & 6) -->
+    <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal">
             <button class="modal-close" onclick="app.closeCheckoutModal()">&times;</button>
@@ -508,7 +569,7 @@
         </div>
     </div>
 
-    <!-- SELLER ADD / EDIT PRODUCT MODAL (Week 3) -->
+    <!-- SELLER ADD / EDIT PRODUCT MODAL -->
     <div id="product-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal">
             <button class="modal-close" onclick="app.closeProductModal()">&times;</button>
@@ -561,7 +622,7 @@
         </div>
     </div>
 
-    <!-- AUTH MODAL DIALOGUE (Week 1) -->
+    <!-- AUTH MODAL DIALOGUE -->
     <div id="auth-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal">
             <button class="modal-close" onclick="app.closeModal()">&times;</button>

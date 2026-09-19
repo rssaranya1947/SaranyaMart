@@ -1,4 +1,4 @@
-/* SaranyaMart Modern Design System - Weeks 1-6 Complete */
+/* SaranyaMart Modern Design System - Weeks 1-7 Complete */
 :root {
     --primary: #4f46e5;
     --primary-hover: #4338ca;
@@ -17,6 +17,15 @@
     --radius-sm: 6px;
 }
 
+/* LIGHT THEME VARIABLES (Week 7) */
+body.light-theme {
+    --bg-dark: #f1f5f9;
+    --bg-surface: #ffffff;
+    --text-light: #0f172a;
+    --text-muted: #64748b;
+    --border-color: rgba(0, 0, 0, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -30,6 +39,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* NAVBAR & CATEGORIES */
@@ -40,6 +50,10 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+}
+
+body.light-theme .navbar {
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .nav-container {
@@ -72,11 +86,7 @@ body {
     color: white;
 }
 
-.logo-text {
-    font-size: 1.5rem;
-    font-weight: 800;
-}
-
+.logo-text { font-size: 1.5rem; font-weight: 800; }
 .logo-text span { color: var(--secondary); }
 
 .search-box {
@@ -122,6 +132,10 @@ body {
     font-weight: 700;
 }
 
+.theme-toggle-btn {
+    border-radius: 50%; width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;
+}
+
 .btn-cart {
     background: rgba(79, 70, 229, 0.2);
     border: 1px solid rgba(79, 70, 229, 0.4);
@@ -144,6 +158,10 @@ body {
     background: rgba(30, 41, 59, 0.5);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding: 0.5rem 0;
+}
+
+body.light-theme .category-bar {
+    background: rgba(241, 245, 249, 0.8);
 }
 
 .category-container {
@@ -315,9 +333,20 @@ body {
 .product-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.4; margin-bottom: 1rem; flex: 1; }
 .product-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .product-price { font-size: 1.35rem; font-weight: 800; color: var(--secondary); }
-.seller-chip { font-size: 0.75rem; color: var(--text-muted); }
 
-/* INVOICE MODAL (Week 6) */
+.seller-chip {
+    font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
+}
+.seller-chip:hover { color: #818cf8; text-decoration: underline; }
+
+.badge-low-stock {
+    background: rgba(239, 68, 68, 0.2); color: #ef4444; font-size: 0.75rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 10px;
+}
+
+/* STOREFRONT & INBOX MODALS (Week 7) */
+.store-modal-content { max-width: 680px; }
+
+/* INVOICE MODAL */
 .invoice-modal-content { max-width: 650px; background: #ffffff !important; color: #1e293b !important; }
 
 .invoice-box { padding: 1.5rem; font-family: sans-serif; }
@@ -351,7 +380,7 @@ body {
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
 .form-select {
-    width: 100%; padding: 0.75rem 1rem; background: #0f172a; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-light);
+    width: 100%; padding: 0.75rem 1rem; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-light);
 }
 
 .admin-tabs { margin-bottom: 0; border-radius: 0; }
@@ -378,7 +407,7 @@ body {
 }
 
 .glass-modal {
-    background: #1e293b; border: 1px solid var(--border-color); border-radius: 20px; width: 90%; max-width: 460px; padding: 2rem; position: relative; box-shadow: var(--shadow-lg);
+    background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 20px; width: 90%; max-width: 460px; padding: 2rem; position: relative; box-shadow: var(--shadow-lg); color: var(--text-light);
 }
 
 .modal-close {
@@ -406,7 +435,7 @@ body {
 
 /* TOASTS */
 .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; }
-.toast { background: #1e293b; border: 1px solid var(--border-color); padding: 1rem 1.25rem; border-radius: 12px; display: flex; align-items: center; gap: 0.75rem; min-width: 280px; }
+.toast { background: var(--bg-surface); border: 1px solid var(--border-color); padding: 1rem 1.25rem; border-radius: 12px; display: flex; align-items: center; gap: 0.75rem; min-width: 280px; color: var(--text-light); }
 .toast.success { border-left: 4px solid var(--secondary); }
 .toast.error { border-left: 4px solid #ef4444; }
 .toast.info { border-left: 4px solid var(--primary); }
@@ -415,8 +444,8 @@ body {
 .admin-table-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); }
 .table-container { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; text-align: left; }
-.data-table th { background: rgba(255, 255, 255, 0.03); padding: 1rem 1.5rem; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border-color); }
-.data-table td { padding: 1rem 1.5rem; font-size: 0.9rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.data-table th { background: rgba(0, 0, 0, 0.05); padding: 1rem 1.5rem; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border-color); }
+.data-table td { padding: 1rem 1.5rem; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); }
 
 .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
 .stat-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem; display: flex; align-items: center; gap: 1.25rem; }
