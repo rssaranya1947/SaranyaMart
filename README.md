@@ -140,7 +140,7 @@ All API endpoints strictly follow the standard fixed envelope format:
 
 ---
 
-## 🚀 Milestones Completed (Weeks 1 – 10)
+## 🚀 Milestones Completed (Weeks 1 – 11 Final)
 
 - [x] **Week 1 – Project Skeleton & Database Schema**: Spring Boot project layout, Maven configuration, database initialization.
 - [x] **Week 2 – Authentication & User Roles**: Registration and login for Buyer, Seller, and Admin with password hashing.
@@ -159,9 +159,13 @@ All API endpoints strictly follow the standard fixed envelope format:
   - Server-side REST API proxy controller (`/api/chat` & `/api/v1/chat`).
   - Per-session rate limiting (10 msg/min), input length caps (300 chars), and in-memory question caching.
 - [x] **Week 10 – Chatbot Refinement, UI Polish & Architecture Specs**:
-  - Refined chatbot knowledge base and added interactive category trigger chips (e.g. clicking "Browse Laptops" filters main marketplace catalog!).
-  - Added active provider badge ("Mock Mode" / "Gemini AI") and clear chat history button.
+  - Refined chatbot knowledge base and added interactive category trigger chips.
   - Documented Section 4 ER Diagram Schema, Section 12 Required Design Patterns, and Section 13 API Contract table.
+- [x] **Week 11 – Final Review & Capstone Review Package**:
+  - Completed full automated regression pass (`mvn clean verify` 100% passed).
+  - Authored Final Technical Project Report (`FINAL_PROJECT_REPORT.md`).
+  - Authored Evaluation Presentation Slide Deck (`PRESENTATION_SLIDE_DECK.md`) and Rehearsed Demo Script (`DEMO_SCRIPT.md`).
+
 
 ---
 
