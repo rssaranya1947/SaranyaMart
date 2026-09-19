@@ -35,6 +35,10 @@
 
             <!-- Header Action Controls -->
             <div class="nav-actions" id="nav-actions">
+                <button class="btn btn-cart" id="btn-open-wishlist-guest" onclick="app.openWishlistModal()">
+                    <i class="fa-solid fa-heart text-danger"></i> Wishlist
+                    <span class="cart-badge" id="wishlist-badge-count">0</span>
+                </button>
                 <button class="btn btn-cart" id="btn-open-cart" onclick="app.openCartModal()">
                     <i class="fa-solid fa-cart-shopping"></i> Cart
                     <span class="cart-badge" id="cart-badge-count">0</span>
@@ -49,6 +53,10 @@
 
             <!-- Logged-In User Profile Info -->
             <div class="user-profile-header hidden" id="user-profile-header">
+                <button class="btn btn-cart" onclick="app.openWishlistModal()">
+                    <i class="fa-solid fa-heart text-danger"></i> Wishlist
+                    <span class="cart-badge" id="wishlist-badge-count-user">0</span>
+                </button>
                 <button class="btn btn-cart" onclick="app.openCartModal()">
                     <i class="fa-solid fa-cart-shopping"></i> Cart
                     <span class="cart-badge" id="cart-badge-count-user">0</span>
@@ -84,7 +92,7 @@
                 <div class="hero-text-content">
                     <span class="hero-tag"><i class="fa-solid fa-sparkles"></i> SaranyaMart Multi-Seller Marketplace</span>
                     <h1>Shop Laptops, Mobiles & Electronics</h1>
-                    <p>Verified sellers, guaranteed quality, and instant checkout.</p>
+                    <p>Verified sellers, 5-star buyer ratings, and instant checkout.</p>
                 </div>
                 <!-- Quick Demo Logins Box -->
                 <div class="demo-credentials-card">
@@ -103,7 +111,28 @@
                 </div>
             </div>
 
-            <!-- Product Grid -->
+            <!-- Product Filter & Sorting Controls (Week 5) -->
+            <div class="filter-sort-bar margin-bottom">
+                <div class="filter-inputs">
+                    <span class="filter-label"><i class="fa-solid fa-filter"></i> Price Range:</span>
+                    <input type="number" id="filter-min-price" placeholder="Min ₹" min="0" class="filter-input">
+                    <span class="filter-separator">-</span>
+                    <input type="number" id="filter-max-price" placeholder="Max ₹" min="0" class="filter-input">
+                    <button class="btn btn-outline btn-sm" onclick="app.applyFilters()">Apply</button>
+                    <button class="btn btn-link btn-sm" onclick="app.clearFilters()">Clear</button>
+                </div>
+                <div class="sort-selector">
+                    <label for="sort-by-select"><i class="fa-solid fa-arrow-down-short-wide"></i> Sort By:</label>
+                    <select id="sort-by-select" class="form-select form-select-sm" onchange="app.applyFilters()">
+                        <option value="newest">Newest First</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="rating">Highest Rated ⭐</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Product Grid Header -->
             <div class="section-header">
                 <h2><i class="fa-solid fa-boxes-stacked"></i> Featured Marketplace Products</h2>
                 <span class="product-count-label" id="catalog-count-label">Loading products...</span>
@@ -119,7 +148,7 @@
             <div class="dashboard-header">
                 <div>
                     <h2><i class="fa-solid fa-clock-rotate-left"></i> My Order History</h2>
-                    <p>Track your placed orders, status updates, and purchase summaries.</p>
+                    <p>Track your placed orders, cancel pending items, and view purchase summaries.</p>
                 </div>
                 <button class="btn btn-outline" onclick="app.showHome()">
                     <i class="fa-solid fa-arrow-left"></i> Back to Shopping
@@ -131,12 +160,12 @@
             </div>
         </section>
 
-        <!-- SELLER DASHBOARD VIEW (Week 3) -->
+        <!-- SELLER DASHBOARD VIEW (Weeks 3 & 5) -->
         <section id="seller-dashboard" class="dashboard-section hidden">
             <div class="dashboard-header">
                 <div>
                     <h2><i class="fa-solid fa-store"></i> Seller Control Center</h2>
-                    <p>Manage your product listings, track store stock, and fulfill customer orders.</p>
+                    <p>Manage product listings, monitor store inventory, and fulfill customer orders.</p>
                 </div>
                 <button class="btn btn-primary" onclick="app.openProductModal()">
                     <i class="fa-solid fa-plus"></i> Add New Product
@@ -181,7 +210,7 @@
                                 <th>Category</th>
                                 <th>Price</th>
                                 <th>Stock</th>
-                                <th>Status</th>
+                                <th>Rating</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -217,15 +246,15 @@
             </div>
         </section>
 
-        <!-- ADMIN DASHBOARD VIEW (Week 4) -->
+        <!-- ADMIN DASHBOARD VIEW (Weeks 4 & 5) -->
         <section id="admin-dashboard" class="dashboard-section hidden">
             <div class="dashboard-header">
                 <div>
                     <h2><i class="fa-solid fa-shield-halved"></i> Admin Control Panel</h2>
-                    <p>Platform Supervision: Users, All Orders, and Product Moderation.</p>
+                    <p>Platform Supervision: Users, Orders, Moderation & Report Export.</p>
                 </div>
                 <button class="btn btn-secondary" onclick="app.loadAdminData()">
-                    <i class="fa-solid fa-rotate"></i> Refresh Platform Metrics
+                    <i class="fa-solid fa-rotate"></i> Refresh Metrics
                 </button>
             </div>
 
@@ -294,7 +323,7 @@
                                 <th>Shipping Address</th>
                                 <th>Total Amount</th>
                                 <th>Status</th>
-                                <th>Order Date</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="admin-orders-tbody"></tbody>
@@ -321,6 +350,69 @@
             </div>
         </section>
     </main>
+
+    <!-- WISHLIST MODAL (Week 5) -->
+    <div id="wishlist-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal">
+            <button class="modal-close" onclick="app.closeWishlistModal()">&times;</button>
+            <h3><i class="fa-solid fa-heart text-danger"></i> My Wishlist / Bookmarks</h3>
+            <p class="form-desc">Saved products for quick reference and purchase.</p>
+
+            <div class="wishlist-items-list" id="wishlist-items-container">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCT DETAILS & REVIEWS MODAL (Week 5) -->
+    <div id="review-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal review-modal-content">
+            <button class="modal-close" onclick="app.closeReviewModal()">&times;</button>
+            
+            <div class="product-detail-hero" id="review-product-hero">
+                <!-- Dynamically populated product preview -->
+            </div>
+
+            <hr class="modal-divider">
+
+            <!-- Review Submission Form -->
+            <div class="add-review-box">
+                <h4><i class="fa-solid fa-pen-to-square"></i> Leave a Product Review</h4>
+                <form id="form-review" onsubmit="app.submitReview(event)">
+                    <input type="hidden" id="review-product-id">
+                    
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-star text-amber"></i> Star Rating:</label>
+                        <div class="star-rating-picker" id="star-rating-picker">
+                            <i class="fa-solid fa-star star-btn" data-val="1" onclick="app.setStarRating(1)"></i>
+                            <i class="fa-solid fa-star star-btn" data-val="2" onclick="app.setStarRating(2)"></i>
+                            <i class="fa-solid fa-star star-btn" data-val="3" onclick="app.setStarRating(3)"></i>
+                            <i class="fa-solid fa-star star-btn" data-val="4" onclick="app.setStarRating(4)"></i>
+                            <i class="fa-solid fa-star star-btn active" data-val="5" onclick="app.setStarRating(5)"></i>
+                        </div>
+                        <input type="hidden" id="review-rating-value" value="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="review-comment">Review Comment:</label>
+                        <textarea id="review-comment" required placeholder="Share your experience with this product..." rows="3"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>Submit Review</span> <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Existing Customer Reviews List -->
+            <div class="existing-reviews-section margin-top">
+                <h4><i class="fa-solid fa-comments"></i> Customer Reviews (<span id="review-modal-count">0</span>)</h4>
+                <div id="reviews-list-container" class="reviews-list-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- SHOPPING CART MODAL (Week 2) -->
     <div id="cart-modal" class="modal-backdrop hidden">

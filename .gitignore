@@ -3,9 +3,10 @@ target/
 bin/
 *.class
 
-# SQLite Database File
+# SQLite & JSON Database Files
 saranyamart.db
 *.sqlite
+saranyamart_*.json
 
 # IDE Artifacts
 .idea/

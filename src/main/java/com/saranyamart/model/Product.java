@@ -15,6 +15,8 @@ public class Product {
     private int stockQuantity;
     private String status; // 'active', 'flagged', 'deleted'
     private String createdAt;
+    private double averageRating = 5.0;
+    private int reviewCount = 0;
 
     public Product() {}
 
@@ -66,4 +68,10 @@ public class Product {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public double getAverageRating() { return averageRating; }
+    public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
+
+    public int getReviewCount() { return reviewCount; }
+    public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
 }

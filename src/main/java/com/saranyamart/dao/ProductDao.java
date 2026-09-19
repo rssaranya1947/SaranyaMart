@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Data Access Object (DAO) for Product operations in SaranyaMart.
@@ -16,12 +17,29 @@ import java.util.stream.Collectors;
 public class ProductDao {
 
     public List<Product> getAllActiveProducts(String category, String search) {
-        return DatabaseManager.getProductMap().values().stream()
+        return getAllActiveProducts(category, search, null, null, "newest");
+    }
+
+    public List<Product> getAllActiveProducts(String category, String search, Double minPrice, Double maxPrice, String sortBy) {
+        Stream<Product> stream = DatabaseManager.getProductMap().values().stream()
                 .filter(p -> "active".equalsIgnoreCase(p.getStatus()))
                 .filter(p -> category == null || category.isEmpty() || "all".equalsIgnoreCase(category) || p.getCategory().equalsIgnoreCase(category))
                 .filter(p -> search == null || search.isEmpty() || p.getTitle().toLowerCase().contains(search.toLowerCase()) || (p.getDescription() != null && p.getDescription().toLowerCase().contains(search.toLowerCase())))
-                .sorted(Comparator.comparingInt(Product::getId).reversed())
-                .collect(Collectors.toList());
+                .filter(p -> minPrice == null || p.getPrice() >= minPrice)
+                .filter(p -> maxPrice == null || p.getPrice() <= maxPrice);
+
+        Comparator<Product> comp;
+        if ("price_asc".equalsIgnoreCase(sortBy)) {
+            comp = Comparator.comparingDouble(Product::getPrice);
+        } else if ("price_desc".equalsIgnoreCase(sortBy)) {
+            comp = Comparator.comparingDouble(Product::getPrice).reversed();
+        } else if ("rating".equalsIgnoreCase(sortBy)) {
+            comp = Comparator.comparingDouble(Product::getAverageRating).reversed();
+        } else { // default "newest"
+            comp = Comparator.comparingInt(Product::getId).reversed();
+        }
+
+        return stream.sorted(comp).collect(Collectors.toList());
     }
 
     public List<Product> getAllProductsAdmin() {

@@ -28,13 +28,16 @@ public class ProductController {
     public ResponseEntity<Map<String, Object>> getProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @RequestParam(required = false, defaultValue = "false") boolean admin) {
 
         List<Product> products;
         if (admin) {
             products = productDao.getAllProductsAdmin();
         } else {
-            products = productDao.getAllActiveProducts(category, search);
+            products = productDao.getAllActiveProducts(category, search, minPrice, maxPrice, sortBy);
         }
 
         Map<String, Object> response = new HashMap<>();

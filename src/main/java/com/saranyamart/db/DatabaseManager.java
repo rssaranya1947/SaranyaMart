@@ -3,6 +3,7 @@ package com.saranyamart.db;
 import com.saranyamart.model.Order;
 import com.saranyamart.model.OrderItem;
 import com.saranyamart.model.Product;
+import com.saranyamart.model.Review;
 import com.saranyamart.model.Role;
 import com.saranyamart.model.User;
 import com.saranyamart.util.PasswordUtil;
@@ -20,13 +21,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Pure Java Storage Engine for SaranyaMart.
- * Thread-safe in-memory data store with file persistence for Users, Products, and Orders.
+ * Thread-safe in-memory data store with file persistence for Users, Products, Orders, and Reviews.
  */
 public class DatabaseManager {
 
     private static final String USERS_FILE = "saranyamart_users.json";
     private static final String PRODUCTS_FILE = "saranyamart_products.json";
     private static final String ORDERS_FILE = "saranyamart_orders.json";
+    private static final String REVIEWS_FILE = "saranyamart_reviews.json";
 
     private static final Map<Integer, User> userMap = new ConcurrentHashMap<>();
     private static final Map<String, Integer> emailIndex = new ConcurrentHashMap<>();
@@ -38,13 +40,17 @@ public class DatabaseManager {
     private static final Map<Integer, Order> orderMap = new ConcurrentHashMap<>();
     private static final AtomicInteger orderIdCounter = new AtomicInteger(500);
 
+    private static final Map<Integer, Review> reviewMap = new ConcurrentHashMap<>();
+    private static final AtomicInteger reviewIdCounter = new AtomicInteger(1000);
+
     public static synchronized void initializeDatabase() {
         System.out.println("[DatabaseManager] Initializing Pure Java Storage Engine...");
 
-        // Load users, products, orders from disk if present
+        // Load users, products, orders, reviews from disk if present
         loadUsersFromDisk();
         loadProductsFromDisk();
         loadOrdersFromDisk();
+        loadReviewsFromDisk();
 
         // Seed default users if missing
         seedUserIfNotExists("Admin User", "admin@saranyamart.com", "Admin@123", Role.ADMIN);
@@ -57,12 +63,20 @@ public class DatabaseManager {
         // Seed default sample order if missing
         seedSampleOrdersIfEmpty();
 
+        // Seed sample reviews if empty
+        seedSampleReviewsIfEmpty();
+
+        // Recalculate average ratings for all products based on reviews
+        recalculateProductRatingStats();
+
         saveUsersToDisk();
         saveProductsToDisk();
         saveOrdersToDisk();
+        saveReviewsToDisk();
 
         System.out.println("[DatabaseManager] Initialization complete! Users: " + userMap.size() 
-                           + ", Products: " + productMap.size() + ", Orders: " + orderMap.size());
+                           + ", Products: " + productMap.size() + ", Orders: " + orderMap.size()
+                           + ", Reviews: " + reviewMap.size());
     }
 
     // Getters for Maps and ID Generators
@@ -75,6 +89,9 @@ public class DatabaseManager {
 
     public static Map<Integer, Order> getOrderMap() { return orderMap; }
     public static int generateNextOrderId() { return orderIdCounter.incrementAndGet(); }
+
+    public static Map<Integer, Review> getReviewMap() { return reviewMap; }
+    public static int generateNextReviewId() { return reviewIdCounter.incrementAndGet(); }
 
     // Seed Helpers
     private static void seedUserIfNotExists(String name, String email, String rawPassword, Role role) {
@@ -113,6 +130,38 @@ public class DatabaseManager {
         }
     }
 
+    private static void seedSampleReviewsIfEmpty() {
+        if (reviewMap.isEmpty()) {
+            int r1 = generateNextReviewId();
+            reviewMap.put(r1, new Review(r1, 201, 103, "Arun Kumar", 5, "Exceeded expectations! Blazing fast performance and beautiful display.", "2026-08-14 11:20:00"));
+
+            int r2 = generateNextReviewId();
+            reviewMap.put(r2, new Review(r2, 202, 103, "Arun Kumar", 4, "Great camera quality and long battery life. Highly recommended!", "2026-08-15 16:45:00"));
+
+            int r3 = generateNextReviewId();
+            reviewMap.put(r3, new Review(r3, 203, 103, "Arun Kumar", 5, "Super comfortable noise cancelling headphones. Great bass.", "2026-08-16 09:10:00"));
+        }
+    }
+
+    private static void recalculateProductRatingStats() {
+        for (Product product : productMap.values()) {
+            List<Review> pReviews = new ArrayList<>();
+            for (Review r : reviewMap.values()) {
+                if (r.getProductId() == product.getId()) {
+                    pReviews.add(r);
+                }
+            }
+            if (!pReviews.isEmpty()) {
+                double avg = pReviews.stream().mapToInt(Review::getRating).average().orElse(5.0);
+                product.setAverageRating(Math.round(avg * 10.0) / 10.0);
+                product.setReviewCount(pReviews.size());
+            } else {
+                product.setAverageRating(5.0);
+                product.setReviewCount(0);
+            }
+        }
+    }
+
     // Persistence logic
     public static synchronized void saveUsersToDisk() {
         saveJson(USERS_FILE, serializeUsers());
@@ -124,6 +173,10 @@ public class DatabaseManager {
 
     public static synchronized void saveOrdersToDisk() {
         saveJson(ORDERS_FILE, serializeOrders());
+    }
+
+    public static synchronized void saveReviewsToDisk() {
+        saveJson(REVIEWS_FILE, serializeReviews());
     }
 
     private static void saveJson(String filename, String jsonContent) {
@@ -139,7 +192,6 @@ public class DatabaseManager {
         if (!f.exists()) return;
         try {
             String content = Files.readString(f.toPath(), StandardCharsets.UTF_8);
-            // Quick regex parser fallback for standard user entries
             java.util.regex.Pattern p = java.util.regex.Pattern.compile("\\{[^}]*\\}");
             java.util.regex.Matcher m = p.matcher(content);
             int maxId = 100;
@@ -199,6 +251,34 @@ public class DatabaseManager {
         // Keeps seeded/persisted orders
     }
 
+    private static void loadReviewsFromDisk() {
+        File f = new File(REVIEWS_FILE);
+        if (!f.exists()) return;
+        try {
+            String content = Files.readString(f.toPath(), StandardCharsets.UTF_8);
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile("\\{[^}]*\\}");
+            java.util.regex.Matcher m = p.matcher(content);
+            int maxId = 1000;
+            while (m.find()) {
+                String b = m.group();
+                int id = Integer.parseInt(extract(b, "id", "1000"));
+                int productId = Integer.parseInt(extract(b, "productId", "201"));
+                int buyerId = Integer.parseInt(extract(b, "buyerId", "103"));
+                String buyerName = extract(b, "buyerName", "Buyer");
+                int rating = Integer.parseInt(extract(b, "rating", "5"));
+                String comment = extract(b, "comment", "");
+                String created = extract(b, "createdAt", "2026-08-14");
+
+                Review r = new Review(id, productId, buyerId, buyerName, rating, comment, created);
+                reviewMap.put(id, r);
+                if (id > maxId) maxId = id;
+            }
+            reviewIdCounter.set(maxId);
+        } catch (Exception e) {
+            System.err.println("[DatabaseManager] Warning loading reviews: " + e.getMessage());
+        }
+    }
+
     private static String serializeUsers() {
         StringBuilder json = new StringBuilder("[\n");
         List<User> list = new ArrayList<>(userMap.values());
@@ -253,6 +333,25 @@ public class DatabaseManager {
                 .append(",\"status\":\"").append(esc(o.getStatus())).append("\"")
                 .append(",\"shippingAddress\":\"").append(esc(o.getShippingAddress())).append("\"")
                 .append(",\"orderDate\":\"").append(esc(o.getOrderDate())).append("\"}");
+            if (i < list.size() - 1) json.append(",");
+            json.append("\n");
+        }
+        json.append("]");
+        return json.toString();
+    }
+
+    private static String serializeReviews() {
+        StringBuilder json = new StringBuilder("[\n");
+        List<Review> list = new ArrayList<>(reviewMap.values());
+        for (int i = 0; i < list.size(); i++) {
+            Review r = list.get(i);
+            json.append("  {\"id\":").append(r.getId())
+                .append(",\"productId\":").append(r.getProductId())
+                .append(",\"buyerId\":").append(r.getBuyerId())
+                .append(",\"buyerName\":\"").append(esc(r.getBuyerName())).append("\"")
+                .append(",\"rating\":").append(r.getRating())
+                .append(",\"comment\":\"").append(esc(r.getComment())).append("\"")
+                .append(",\"createdAt\":\"").append(esc(r.getCreatedAt())).append("\"}");
             if (i < list.size() - 1) json.append(",");
             json.append("\n");
         }

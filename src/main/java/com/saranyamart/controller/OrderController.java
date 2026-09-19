@@ -110,4 +110,22 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
+
+    /**
+     * PUT /api/orders/{id}/cancel - Buyer / Admin Cancel Order & Restore Stock
+     */
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<Map<String, Object>> cancelOrder(@PathVariable int id) {
+        Map<String, Object> response = new HashMap<>();
+        boolean cancelled = orderDao.cancelOrder(id);
+        if (cancelled) {
+            response.put("success", true);
+            response.put("message", "Order cancelled successfully and product inventory restored!");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("success", false);
+            response.put("message", "Order could not be cancelled or was already cancelled.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 }

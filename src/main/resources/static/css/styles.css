@@ -1,4 +1,4 @@
-/* SaranyaMart Modern Design System - Weeks 1-4 Complete */
+/* SaranyaMart Modern Design System - Weeks 1-5 Complete */
 :root {
     --primary: #4f46e5;
     --primary-hover: #4338ca;
@@ -206,7 +206,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -224,6 +224,54 @@ body {
     font-size: 0.8rem;
     font-weight: 700;
     margin-bottom: 0.75rem;
+}
+
+/* FILTER & SORTING BAR (Week 5) */
+.filter-sort-bar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
+
+.filter-input {
+    width: 90px;
+    padding: 0.35rem 0.6rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.filter-separator { color: var(--text-muted); }
+
+.sort-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.form-select-sm {
+    width: auto;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
 }
 
 .section-header {
@@ -249,6 +297,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
     transition: transform 0.2s, border-color 0.2s;
 }
 
@@ -257,11 +306,38 @@ body {
     border-color: rgba(79, 70, 229, 0.5);
 }
 
+.wishlist-toggle-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.2s;
+}
+
+.wishlist-toggle-btn.active {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
 .product-img-box {
     height: 180px;
     background: rgba(0, 0, 0, 0.2);
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .product-img-box img {
@@ -295,6 +371,23 @@ body {
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 0.4rem;
+    cursor: pointer;
+}
+
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fbbf24;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.rating-badge .review-cnt {
+    color: var(--text-muted);
+    font-weight: 400;
 }
 
 .product-desc {
@@ -322,6 +415,71 @@ body {
     font-size: 0.75rem;
     color: var(--text-muted);
 }
+
+/* REVIEWS MODAL & CARDS (Week 5) */
+.review-modal-content { max-width: 600px; }
+
+.product-detail-hero {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.detail-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.modal-divider { border: 0; height: 1px; background: var(--border-color); margin: 1.25rem 0; }
+
+.star-rating-picker {
+    display: flex;
+    gap: 0.4rem;
+    font-size: 1.4rem;
+    margin-top: 0.25rem;
+}
+
+.star-btn {
+    color: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.star-btn.active, .star-btn:hover {
+    color: #fbbf24;
+}
+
+.reviews-list-container {
+    max-height: 220px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.review-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.85rem;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.35rem;
+}
+
+.review-author { font-weight: 700; font-size: 0.85rem; }
+.review-stars { color: #fbbf24; font-size: 0.8rem; }
+.review-text { font-size: 0.85rem; color: var(--text-light); line-height: 1.4; }
+.review-date { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; }
 
 /* CART & CHECKOUT */
 .cart-modal-content { max-width: 520px; }
@@ -392,6 +550,8 @@ body {
 }
 
 .text-emerald { color: #34d399; font-size: 0.85rem; font-weight: 600; margin-top: 0.25rem; }
+.text-danger { color: #ef4444; }
+.text-amber { color: #fbbf24; }
 
 /* ORDER CARDS & DASHBOARDS */
 .order-card {
@@ -422,9 +582,11 @@ body {
 .status-chip.pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 .status-chip.processing { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
 .status-chip.delivered { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.status-chip.cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
 /* MODALS & TABLES */
 .margin-bottom { margin-bottom: 2rem; }
+.margin-top { margin-top: 1.5rem; }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 

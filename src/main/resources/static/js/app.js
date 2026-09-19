@@ -1,22 +1,28 @@
 /**
- * SaranyaMart Client-Side Web Engine - Weeks 1 to 4 Complete
+ * SaranyaMart Client-Side Web Engine - Weeks 1 to 5 Complete
  */
 class SaranyaMartApp {
     constructor() {
         this.currentUser = null;
         this.token = null;
         this.cart = [];
+        this.wishlist = [];
         this.currentCategory = 'all';
         this.searchQuery = '';
+        this.minPrice = null;
+        this.maxPrice = null;
+        this.sortBy = 'newest';
         this.allProducts = [];
+        this.activeReviewProduct = null;
         this.init();
     }
 
     init() {
-        // Load user session and cart from localStorage
+        // Load user session, cart, and wishlist from localStorage
         const savedUser = localStorage.getItem('sm_user');
         const savedToken = localStorage.getItem('sm_token');
         const savedCart = localStorage.getItem('sm_cart');
+        const savedWishlist = localStorage.getItem('sm_wishlist');
 
         if (savedUser && savedToken) {
             try {
@@ -29,14 +35,15 @@ class SaranyaMartApp {
         }
 
         if (savedCart) {
-            try {
-                this.cart = JSON.parse(savedCart);
-            } catch (e) {
-                this.cart = [];
-            }
+            try { this.cart = JSON.parse(savedCart); } catch (e) { this.cart = []; }
+        }
+
+        if (savedWishlist) {
+            try { this.wishlist = JSON.parse(savedWishlist); } catch (e) { this.wishlist = []; }
         }
 
         this.updateCartBadge();
+        this.updateWishlistBadge();
         this.loadCatalog();
         if (this.currentUser) {
             this.renderRoleDashboard();
@@ -202,16 +209,17 @@ class SaranyaMartApp {
         }
     }
 
-    // WEEK 2: PRODUCT CATALOG, SEARCH & CATEGORY FILTERING
+    // WEEK 2 & 5: PRODUCT CATALOG, SEARCH, CATEGORY FILTER & PRICE/SORTING
     async loadCatalog() {
         const grid = document.getElementById('product-catalog-grid');
         grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; padding: 2rem;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Loading Products...</p></div>';
 
         try {
             let url = `/api/products?category=${encodeURIComponent(this.currentCategory)}`;
-            if (this.searchQuery) {
-                url += `&search=${encodeURIComponent(this.searchQuery)}`;
-            }
+            if (this.searchQuery) url += `&search=${encodeURIComponent(this.searchQuery)}`;
+            if (this.minPrice !== null && this.minPrice !== '') url += `&minPrice=${this.minPrice}`;
+            if (this.maxPrice !== null && this.maxPrice !== '') url += `&maxPrice=${this.maxPrice}`;
+            if (this.sortBy) url += `&sortBy=${encodeURIComponent(this.sortBy)}`;
 
             const response = await fetch(url);
             const data = await response.json();
@@ -240,6 +248,29 @@ class SaranyaMartApp {
         }
     }
 
+    applyFilters() {
+        const minVal = document.getElementById('filter-min-price').value;
+        const maxVal = document.getElementById('filter-max-price').value;
+        const sortVal = document.getElementById('sort-by-select').value;
+
+        this.minPrice = minVal !== '' ? parseFloat(minVal) : null;
+        this.maxPrice = maxVal !== '' ? parseFloat(maxVal) : null;
+        this.sortBy = sortVal || 'newest';
+
+        this.loadCatalog();
+    }
+
+    clearFilters() {
+        document.getElementById('filter-min-price').value = '';
+        document.getElementById('filter-max-price').value = '';
+        document.getElementById('sort-by-select').value = 'newest';
+
+        this.minPrice = null;
+        this.maxPrice = null;
+        this.sortBy = 'newest';
+        this.loadCatalog();
+    }
+
     renderProductGrid(products) {
         const grid = document.getElementById('product-catalog-grid');
         grid.innerHTML = '';
@@ -249,21 +280,31 @@ class SaranyaMartApp {
                 <div style="grid-column: 1/-1; text-align: center; padding: 3rem;" class="empty-state-card">
                     <i class="fa-solid fa-box-open fa-3x" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
                     <h3>No products found</h3>
-                    <p style="color: var(--text-muted);">Try adjusting your category filter or search query.</p>
+                    <p style="color: var(--text-muted);">Try adjusting your category filter, price range, or search query.</p>
                 </div>`;
             return;
         }
 
         products.forEach(p => {
+            const isWishlisted = this.wishlist.includes(p.id);
+            const avgRating = p.averageRating ? p.averageRating.toFixed(1) : '5.0';
+            const reviewCount = p.reviewCount || 0;
+
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-                <div class="product-img-box">
+                <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="app.toggleWishlist(${p.id})" title="${isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}">
+                    <i class="fa-solid fa-heart"></i>
+                </button>
+                <div class="product-img-box" onclick="app.openReviewModal(${p.id})">
                     <img src="${p.imageUrl}" alt="${p.title}" onerror="this.src='https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500'">
                     <span class="category-chip">${p.category}</span>
                 </div>
                 <div class="product-body">
-                    <h3 class="product-title">${p.title}</h3>
+                    <h3 class="product-title" onclick="app.openReviewModal(${p.id})">${p.title}</h3>
+                    <div class="rating-badge" onclick="app.openReviewModal(${p.id})">
+                        <i class="fa-solid fa-star text-amber"></i> ${avgRating} <span class="review-cnt">(${reviewCount} reviews)</span>
+                    </div>
                     <p class="product-desc">${p.description || 'Quality product from verified seller.'}</p>
                     <div class="product-meta">
                         <span class="product-price">₹${p.price.toLocaleString('en-IN')}</span>
@@ -275,6 +316,192 @@ class SaranyaMartApp {
                 </div>
             `;
             grid.appendChild(card);
+        });
+    }
+
+    // WEEK 5: WISHLIST ENGINE
+    toggleWishlist(productId) {
+        const index = this.wishlist.indexOf(productId);
+        if (index > -1) {
+            this.wishlist.splice(index, 1);
+            this.showToast('Removed item from Wishlist.', 'info');
+        } else {
+            this.wishlist.push(productId);
+            this.showToast('Added item to Wishlist ♥', 'success');
+        }
+
+        localStorage.setItem('sm_wishlist', JSON.stringify(this.wishlist));
+        this.updateWishlistBadge();
+        this.renderProductGrid(this.allProducts);
+        if (!document.getElementById('wishlist-modal').classList.contains('hidden')) {
+            this.renderWishlistModal();
+        }
+    }
+
+    updateWishlistBadge() {
+        const count = this.wishlist.length;
+        document.getElementById('wishlist-badge-count').textContent = count;
+        const uBadge = document.getElementById('wishlist-badge-count-user');
+        if (uBadge) uBadge.textContent = count;
+    }
+
+    openWishlistModal() {
+        this.renderWishlistModal();
+        document.getElementById('wishlist-modal').classList.remove('hidden');
+    }
+
+    closeWishlistModal() {
+        document.getElementById('wishlist-modal').classList.add('hidden');
+    }
+
+    renderWishlistModal() {
+        const container = document.getElementById('wishlist-items-container');
+        container.innerHTML = '';
+
+        if (this.wishlist.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Your wishlist is currently empty.</p>';
+            return;
+        }
+
+        this.wishlist.forEach(id => {
+            const p = this.allProducts.find(item => item.id === id);
+            if (!p) return;
+
+            const row = document.createElement('div');
+            row.className = 'cart-item-row';
+            row.innerHTML = `
+                <img src="${p.imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${p.title}</div>
+                    <div class="cart-item-price">₹${p.price.toLocaleString('en-IN')}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-star text-amber"></i> ${p.averageRating ? p.averageRating.toFixed(1) : '5.0'}</div>
+                </div>
+                <div>
+                    <button class="btn btn-primary btn-sm" onclick="app.addToCart(${p.id})"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
+                    <button class="btn btn-danger btn-sm" onclick="app.toggleWishlist(${p.id})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    // WEEK 5: PRODUCT REVIEWS & 5-STAR RATING SYSTEM
+    async openReviewModal(productId) {
+        const product = this.allProducts.find(p => p.id === productId);
+        if (!product) return;
+
+        this.activeReviewProduct = product;
+        document.getElementById('review-product-id').value = product.id;
+
+        const hero = document.getElementById('review-product-hero');
+        hero.innerHTML = `
+            <img src="${product.imageUrl}" class="detail-img">
+            <div>
+                <h3>${product.title}</h3>
+                <div style="color: var(--secondary); font-weight: 800; font-size: 1.25rem;">₹${product.price.toLocaleString('en-IN')}</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Seller: ${product.sellerName} | Category: ${product.category}</div>
+                <div style="margin-top: 0.5rem;" class="rating-badge"><i class="fa-solid fa-star text-amber"></i> Average Rating: <strong>${product.averageRating ? product.averageRating.toFixed(1) : '5.0'} / 5</strong></div>
+            </div>
+        `;
+
+        this.setStarRating(5);
+        document.getElementById('review-comment').value = '';
+
+        // Fetch reviews
+        try {
+            const res = await fetch(`/api/reviews/product/${productId}`);
+            const reviews = await res.json();
+            this.renderReviewsList(reviews);
+        } catch (e) {
+            this.renderReviewsList([]);
+        }
+
+        document.getElementById('review-modal').classList.remove('hidden');
+    }
+
+    closeReviewModal() {
+        document.getElementById('review-modal').classList.add('hidden');
+    }
+
+    setStarRating(val) {
+        document.getElementById('review-rating-value').value = val;
+        const stars = document.querySelectorAll('#star-rating-picker .star-btn');
+        stars.forEach(s => {
+            const v = parseInt(s.getAttribute('data-val'));
+            if (v <= val) s.classList.add('active');
+            else s.classList.remove('active');
+        });
+    }
+
+    async submitReview(event) {
+        event.preventDefault();
+        if (!this.currentUser) {
+            this.closeReviewModal();
+            this.openModal('login');
+            this.showToast('Please login as Buyer to write a product review.', 'info');
+            return;
+        }
+
+        const productId = parseInt(document.getElementById('review-product-id').value);
+        const rating = parseInt(document.getElementById('review-rating-value').value);
+        const comment = document.getElementById('review-comment').value.trim();
+
+        const payload = {
+            productId,
+            buyerId: this.currentUser.id,
+            buyerName: this.currentUser.fullName,
+            rating,
+            comment
+        };
+
+        try {
+            const response = await fetch('/api/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const saved = await response.json();
+
+            if (response.ok && saved.id) {
+                this.showToast('Review submitted successfully! Thank you.', 'success');
+                document.getElementById('review-comment').value = '';
+                this.loadCatalog(); // Refresh catalog ratings
+                this.openReviewModal(productId); // Refresh modal reviews
+            } else {
+                this.showToast(saved.message || 'Error submitting review.', 'error');
+            }
+        } catch (e) {
+            this.showToast('Server error submitting review.', 'error');
+        }
+    }
+
+    renderReviewsList(reviews) {
+        const container = document.getElementById('reviews-list-container');
+        document.getElementById('review-modal-count').textContent = reviews ? reviews.length : 0;
+        container.innerHTML = '';
+
+        if (!reviews || reviews.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 1rem;">No reviews yet. Be the first to review this product!</p>';
+            return;
+        }
+
+        reviews.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                starsHtml += `<i class="fa-solid fa-star ${i <= r.rating ? 'text-amber' : ''}" style="${i > r.rating ? 'color:rgba(255,255,255,0.2)' : ''}"></i>`;
+            }
+
+            card.innerHTML = `
+                <div class="review-header">
+                    <span class="review-author"><i class="fa-solid fa-circle-user"></i> ${r.buyerName}</span>
+                    <span class="review-stars">${starsHtml}</span>
+                </div>
+                <div class="review-text">${r.comment}</div>
+                <div class="review-date">${r.createdAt || 'Recent'}</div>
+            `;
+            container.appendChild(card);
         });
     }
 
@@ -454,7 +681,7 @@ class SaranyaMartApp {
         }
     }
 
-    // BUYER ORDER HISTORY
+    // BUYER ORDER HISTORY & ORDER CANCELLATION (Week 5)
     async showBuyerOrders() {
         if (!this.currentUser) return;
         this.showView('buyer-orders-view');
@@ -477,10 +704,15 @@ class SaranyaMartApp {
                     const card = document.createElement('div');
                     card.className = 'order-card';
                     const statusClass = (o.status || 'pending').toLowerCase();
+                    const canCancel = statusClass === 'pending' || statusClass === 'processing';
+
                     card.innerHTML = `
                         <div class="order-header">
                             <div><strong>Order #${o.id}</strong> | Date: ${o.orderDate || 'Recent'}</div>
-                            <span class="status-chip ${statusClass}">${o.status}</span>
+                            <div>
+                                <span class="status-chip ${statusClass}">${o.status}</span>
+                                ${canCancel ? `<button class="btn btn-danger btn-sm" style="margin-left:0.5rem;" onclick="app.cancelOrder(${o.id})"><i class="fa-solid fa-ban"></i> Cancel Order</button>` : ''}
+                            </div>
                         </div>
                         <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">
                             <strong>Delivery Address:</strong> ${o.shippingAddress}
@@ -500,6 +732,23 @@ class SaranyaMartApp {
             }
         } catch (e) {
             container.innerHTML = '<p style="color: #ef4444;">Failed to load order history.</p>';
+        }
+    }
+
+    async cancelOrder(orderId) {
+        if (!confirm('Are you sure you want to cancel this order? Item stock will be automatically restored.')) return;
+        try {
+            const response = await fetch(`/api/orders/${orderId}/cancel`, { method: 'PUT' });
+            const data = await response.json();
+            if (data.success) {
+                this.showToast(data.message, 'success');
+                this.showBuyerOrders();
+                this.loadCatalog(); // Refresh stock in catalog
+            } else {
+                this.showToast(data.message || 'Order could not be cancelled.', 'error');
+            }
+        } catch (e) {
+            this.showToast('Error cancelling order.', 'error');
         }
     }
 
@@ -526,7 +775,7 @@ class SaranyaMartApp {
                         <td>${p.category}</td>
                         <td class="text-emerald">₹${p.price.toLocaleString('en-IN')}</td>
                         <td>${p.stockQuantity} pcs</td>
-                        <td><span class="status-chip active">${p.status}</span></td>
+                        <td><i class="fa-solid fa-star text-amber"></i> ${p.averageRating ? p.averageRating.toFixed(1) : '5.0'} (${p.reviewCount || 0})</td>
                         <td>
                             <button class="btn btn-outline btn-sm" onclick="app.openProductModal(${p.id})"><i class="fa-solid fa-pen"></i> Edit</button>
                             <button class="btn btn-danger btn-sm" onclick="app.deleteProductSeller(${p.id})"><i class="fa-solid fa-trash"></i></button>
@@ -561,6 +810,7 @@ class SaranyaMartApp {
                                 <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
                                 <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
                                 <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
                         </td>
                     `;
@@ -720,7 +970,9 @@ class SaranyaMartApp {
                         <td>${o.shippingAddress}</td>
                         <td class="text-emerald">₹${o.totalAmount.toLocaleString('en-IN')}</td>
                         <td><span class="status-chip ${(o.status||'pending').toLowerCase()}">${o.status}</span></td>
-                        <td>${o.orderDate || 'Recent'}</td>
+                        <td>
+                            ${(o.status !== 'Cancelled') ? `<button class="btn btn-danger btn-sm" onclick="app.cancelOrder(${o.id})"><i class="fa-solid fa-ban"></i> Cancel</button>` : '<span style="color:var(--text-muted);">Cancelled</span>'}
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
