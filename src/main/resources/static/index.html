@@ -706,6 +706,60 @@
         </div>
     </div>
 
+    <!-- AI CHATBOT FLOATING WIDGET (Week 9 Phase 3) -->
+    <div id="ai-chat-widget" class="ai-chat-widget">
+        <!-- Chat Toggle Floating Action Button -->
+        <button id="ai-chat-fab" class="ai-chat-fab" onclick="app.toggleChatbot()" title="SaranyaMart AI Shopping Assistant">
+            <i class="fa-solid fa-robot"></i>
+            <span class="chat-fab-badge" id="ai-chat-badge">AI</span>
+        </button>
+
+        <!-- Floating Chat Panel -->
+        <div id="ai-chat-panel" class="ai-chat-panel hidden">
+            <div class="chat-panel-header">
+                <div class="chat-header-info">
+                    <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div>
+                        <h4>SaranyaMart AI Assistant</h4>
+                        <span class="chat-status-badge"><i class="fa-solid fa-circle text-emerald"></i> Online • Market Support</span>
+                    </div>
+                </div>
+                <button class="chat-close-btn" onclick="app.toggleChatbot()">&times;</button>
+            </div>
+
+            <div class="chat-panel-body" id="chat-messages-body">
+                <div class="chat-message bot">
+                    <div class="msg-bubble">
+                        👋 Hi! I'm your <strong>SaranyaMart AI Assistant</strong>. How can I help you with products, shipping, returns, or coupons today?
+                        <div class="msg-time">Just now</div>
+                    </div>
+                </div>
+                <!-- Quick FAQ Suggestion Chips -->
+                <div class="chat-chips-container" id="chat-quick-chips">
+                    <button class="chat-chip" onclick="app.sendQuickChat('What is your return policy?')">🔄 Return Policy</button>
+                    <button class="chat-chip" onclick="app.sendQuickChat('How long does shipping take?')">🚚 Shipping Info</button>
+                    <button class="chat-chip" onclick="app.sendQuickChat('What payment methods are supported?')">💳 Payments</button>
+                    <button class="chat-chip" onclick="app.sendQuickChat('How do I apply a coupon code?')">🎟️ Promo Coupons</button>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div id="chat-typing-indicator" class="chat-typing-indicator hidden">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <span>AI Assistant is thinking...</span>
+            </div>
+
+            <form class="chat-panel-footer" onsubmit="app.submitChatMessage(event)">
+                <input type="text" id="chat-input-text" placeholder="Ask about shipping, returns, products..." maxlength="300" autocomplete="off" required>
+                <button type="submit" class="btn-chat-send" id="btn-chat-send" title="Send Question">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <footer class="site-footer">
         <div class="footer-container">
             <p>&copy; 2026 SaranyaMart E-Commerce Platform. Built with Spring Boot & Embedded Tomcat.</p>
@@ -716,3 +770,4 @@
     <script src="js/app.js"></script>
 </body>
 </html>
+

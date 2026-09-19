@@ -1518,7 +1518,107 @@ class SaranyaMartApp {
             setTimeout(() => toast.remove(), 300);
         }, 4000);
     }
+
+    // ==========================================================================
+    // AI CHATBOT WIDGET CONTROLLER (Week 9 Phase 3)
+    // ==========================================================================
+    toggleChatbot() {
+        const panel = document.getElementById('ai-chat-panel');
+        if (panel) {
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                const input = document.getElementById('chat-input-text');
+                if (input) input.focus();
+                this.scrollChatToBottom();
+            }
+        }
+    }
+
+    sendQuickChat(questionText) {
+        const input = document.getElementById('chat-input-text');
+        if (input) {
+            input.value = questionText;
+            this.submitChatMessage(new Event('submit'));
+        }
+    }
+
+    async submitChatMessage(event) {
+        if (event && event.preventDefault) event.preventDefault();
+        const input = document.getElementById('chat-input-text');
+        const messageText = input ? input.value.trim() : '';
+
+        if (!messageText) return;
+
+        // Render user message bubble
+        this.renderChatMessage(messageText, 'user');
+        input.value = '';
+
+        // Hide chips after first message
+        const chips = document.getElementById('chat-quick-chips');
+        if (chips) chips.style.display = 'none';
+
+        // Show typing indicator
+        const typing = document.getElementById('chat-typing-indicator');
+        if (typing) typing.classList.remove('hidden');
+        this.scrollChatToBottom();
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: messageText })
+            });
+
+            const data = await response.json();
+
+            if (typing) typing.classList.add('hidden');
+
+            if (data.success && (data.reply || (data.data && data.data.reply))) {
+                const reply = data.reply || data.data.reply;
+                this.renderChatMessage(reply, 'bot');
+            } else if (data.error && data.error.message) {
+                this.renderChatMessage(`⚠️ ${data.error.message}`, 'bot');
+            } else {
+                this.renderChatMessage("🤖 I am here to help! Please try asking another question.", 'bot');
+            }
+        } catch (error) {
+            if (typing) typing.classList.add('hidden');
+            this.renderChatMessage("🤖 *SaranyaMart Assistant*: Our AI service is operating in offline mode. Feel free to ask about return policies or shipping!", 'bot');
+        }
+    }
+
+    renderChatMessage(text, sender) {
+        const body = document.getElementById('chat-messages-body');
+        if (!body) return;
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-message ${sender}`;
+
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                .replace(/\n/g, '<br>');
+
+        msgDiv.innerHTML = `
+            <div class="msg-bubble">
+                ${formattedText}
+                <div class="msg-time">${timeStr}</div>
+            </div>
+        `;
+
+        body.appendChild(msgDiv);
+        this.scrollChatToBottom();
+    }
+
+    scrollChatToBottom() {
+        const body = document.getElementById('chat-messages-body');
+        if (body) {
+            body.scrollTop = body.scrollHeight;
+        }
+    }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new SaranyaMartApp();
