@@ -1,5 +1,6 @@
 package com.saranyamart.db;
 
+import com.saranyamart.model.Coupon;
 import com.saranyamart.model.Order;
 import com.saranyamart.model.OrderItem;
 import com.saranyamart.model.Product;
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Pure Java Storage Engine for SaranyaMart.
- * Thread-safe in-memory data store with file persistence for Users, Products, Orders, and Reviews.
+ * Thread-safe in-memory data store with file persistence for Users, Products, Orders, Reviews, and Coupons.
  */
 public class DatabaseManager {
 
@@ -42,6 +43,8 @@ public class DatabaseManager {
 
     private static final Map<Integer, Review> reviewMap = new ConcurrentHashMap<>();
     private static final AtomicInteger reviewIdCounter = new AtomicInteger(1000);
+
+    private static final Map<String, Coupon> couponMap = new ConcurrentHashMap<>();
 
     public static synchronized void initializeDatabase() {
         System.out.println("[DatabaseManager] Initializing Pure Java Storage Engine...");
@@ -66,6 +69,9 @@ public class DatabaseManager {
         // Seed sample reviews if empty
         seedSampleReviewsIfEmpty();
 
+        // Seed sample coupons if empty
+        seedCouponsIfEmpty();
+
         // Recalculate average ratings for all products based on reviews
         recalculateProductRatingStats();
 
@@ -76,7 +82,7 @@ public class DatabaseManager {
 
         System.out.println("[DatabaseManager] Initialization complete! Users: " + userMap.size() 
                            + ", Products: " + productMap.size() + ", Orders: " + orderMap.size()
-                           + ", Reviews: " + reviewMap.size());
+                           + ", Reviews: " + reviewMap.size() + ", Coupons: " + couponMap.size());
     }
 
     // Getters for Maps and ID Generators
@@ -92,6 +98,8 @@ public class DatabaseManager {
 
     public static Map<Integer, Review> getReviewMap() { return reviewMap; }
     public static int generateNextReviewId() { return reviewIdCounter.incrementAndGet(); }
+
+    public static Map<String, Coupon> getCouponMap() { return couponMap; }
 
     // Seed Helpers
     private static void seedUserIfNotExists(String name, String email, String rawPassword, Role role) {
@@ -140,6 +148,14 @@ public class DatabaseManager {
 
             int r3 = generateNextReviewId();
             reviewMap.put(r3, new Review(r3, 203, 103, "Arun Kumar", 5, "Super comfortable noise cancelling headphones. Great bass.", "2026-08-16 09:10:00"));
+        }
+    }
+
+    private static void seedCouponsIfEmpty() {
+        if (couponMap.isEmpty()) {
+            couponMap.put("SARANYA10", new Coupon("SARANYA10", 10.0, 5000.0, 1000.0, true, "10% OFF up to ₹5,000 on orders above ₹1,000"));
+            couponMap.put("WELCOME20", new Coupon("WELCOME20", 20.0, 10000.0, 2000.0, true, "20% OFF up to ₹10,000 for new shoppers"));
+            couponMap.put("FESTIVE15", new Coupon("FESTIVE15", 15.0, 7500.0, 1500.0, true, "15% OFF Festive Special Discount"));
         }
     }
 

@@ -1,5 +1,5 @@
 /**
- * SaranyaMart Client-Side Web Engine - Weeks 1 to 5 Complete
+ * SaranyaMart Client-Side Web Engine - Weeks 1 to 6 Complete
  */
 class SaranyaMartApp {
     constructor() {
@@ -14,15 +14,23 @@ class SaranyaMartApp {
         this.sortBy = 'newest';
         this.allProducts = [];
         this.activeReviewProduct = null;
+        
+        // Week 6 Multi-Currency & Coupon State
+        this.currency = 'INR';
+        this.rates = { INR: 1.0, USD: 0.012, EUR: 0.011 };
+        this.symbols = { INR: '₹', USD: '$', EUR: '€' };
+        this.appliedCoupon = null;
+
         this.init();
     }
 
     init() {
-        // Load user session, cart, and wishlist from localStorage
+        // Load user session, cart, wishlist, and currency from localStorage
         const savedUser = localStorage.getItem('sm_user');
         const savedToken = localStorage.getItem('sm_token');
         const savedCart = localStorage.getItem('sm_cart');
         const savedWishlist = localStorage.getItem('sm_wishlist');
+        const savedCurrency = localStorage.getItem('sm_currency');
 
         if (savedUser && savedToken) {
             try {
@@ -42,11 +50,49 @@ class SaranyaMartApp {
             try { this.wishlist = JSON.parse(savedWishlist); } catch (e) { this.wishlist = []; }
         }
 
+        if (savedCurrency && this.rates[savedCurrency]) {
+            this.currency = savedCurrency;
+            const sel1 = document.getElementById('currency-select');
+            const sel2 = document.getElementById('currency-select-user');
+            if (sel1) sel1.value = savedCurrency;
+            if (sel2) sel2.value = savedCurrency;
+        }
+
         this.updateCartBadge();
         this.updateWishlistBadge();
         this.loadCatalog();
         if (this.currentUser) {
             this.renderRoleDashboard();
+        }
+    }
+
+    // WEEK 6: MULTI-CURRENCY CONVERSION HELPER
+    formatPrice(amountInINR) {
+        if (amountInINR === null || amountInINR === undefined) return '₹0';
+        const rate = this.rates[this.currency] || 1.0;
+        const sym = this.symbols[this.currency] || '₹';
+        const converted = amountInINR * rate;
+        if (this.currency === 'INR') {
+            return `${sym}${Math.round(converted).toLocaleString('en-IN')}`;
+        }
+        return `${sym}${converted.toFixed(2)}`;
+    }
+
+    changeCurrency(newCurr) {
+        if (this.rates[newCurr]) {
+            this.currency = newCurr;
+            localStorage.setItem('sm_currency', newCurr);
+            
+            const sel1 = document.getElementById('currency-select');
+            const sel2 = document.getElementById('currency-select-user');
+            if (sel1) sel1.value = newCurr;
+            if (sel2) sel2.value = newCurr;
+
+            this.renderProductGrid(this.allProducts);
+            this.updateCartBadge();
+            if (this.currentUser) {
+                this.renderRoleDashboard();
+            }
         }
     }
 
@@ -209,7 +255,7 @@ class SaranyaMartApp {
         }
     }
 
-    // WEEK 2 & 5: PRODUCT CATALOG, SEARCH, CATEGORY FILTER & PRICE/SORTING
+    // WEEK 2 & 5: PRODUCT CATALOG & FILTERS
     async loadCatalog() {
         const grid = document.getElementById('product-catalog-grid');
         grid.innerHTML = '<div class="text-center" style="grid-column: 1/-1; padding: 2rem;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Loading Products...</p></div>';
@@ -289,6 +335,7 @@ class SaranyaMartApp {
             const isWishlisted = this.wishlist.includes(p.id);
             const avgRating = p.averageRating ? p.averageRating.toFixed(1) : '5.0';
             const reviewCount = p.reviewCount || 0;
+            const priceFormatted = this.formatPrice(p.price);
 
             const card = document.createElement('div');
             card.className = 'product-card';
@@ -307,7 +354,7 @@ class SaranyaMartApp {
                     </div>
                     <p class="product-desc">${p.description || 'Quality product from verified seller.'}</p>
                     <div class="product-meta">
-                        <span class="product-price">₹${p.price.toLocaleString('en-IN')}</span>
+                        <span class="product-price">${priceFormatted}</span>
                         <span class="seller-chip"><i class="fa-solid fa-store"></i> ${p.sellerName}</span>
                     </div>
                     <button class="btn btn-primary btn-block" onclick="app.addToCart(${p.id})">
@@ -319,7 +366,7 @@ class SaranyaMartApp {
         });
     }
 
-    // WEEK 5: WISHLIST ENGINE
+    // WISHLIST ENGINE
     toggleWishlist(productId) {
         const index = this.wishlist.indexOf(productId);
         if (index > -1) {
@@ -373,7 +420,7 @@ class SaranyaMartApp {
                 <img src="${p.imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                 <div class="cart-item-info">
                     <div class="cart-item-title">${p.title}</div>
-                    <div class="cart-item-price">₹${p.price.toLocaleString('en-IN')}</div>
+                    <div class="cart-item-price">${this.formatPrice(p.price)}</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-star text-amber"></i> ${p.averageRating ? p.averageRating.toFixed(1) : '5.0'}</div>
                 </div>
                 <div>
@@ -385,7 +432,7 @@ class SaranyaMartApp {
         });
     }
 
-    // WEEK 5: PRODUCT REVIEWS & 5-STAR RATING SYSTEM
+    // PRODUCT REVIEWS & STAR RATINGS
     async openReviewModal(productId) {
         const product = this.allProducts.find(p => p.id === productId);
         if (!product) return;
@@ -398,7 +445,7 @@ class SaranyaMartApp {
             <img src="${product.imageUrl}" class="detail-img">
             <div>
                 <h3>${product.title}</h3>
-                <div style="color: var(--secondary); font-weight: 800; font-size: 1.25rem;">₹${product.price.toLocaleString('en-IN')}</div>
+                <div style="color: var(--secondary); font-weight: 800; font-size: 1.25rem;">${this.formatPrice(product.price)}</div>
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Seller: ${product.sellerName} | Category: ${product.category}</div>
                 <div style="margin-top: 0.5rem;" class="rating-badge"><i class="fa-solid fa-star text-amber"></i> Average Rating: <strong>${product.averageRating ? product.averageRating.toFixed(1) : '5.0'} / 5</strong></div>
             </div>
@@ -407,7 +454,6 @@ class SaranyaMartApp {
         this.setStarRating(5);
         document.getElementById('review-comment').value = '';
 
-        // Fetch reviews
         try {
             const res = await fetch(`/api/reviews/product/${productId}`);
             const reviews = await res.json();
@@ -465,8 +511,8 @@ class SaranyaMartApp {
             if (response.ok && saved.id) {
                 this.showToast('Review submitted successfully! Thank you.', 'success');
                 document.getElementById('review-comment').value = '';
-                this.loadCatalog(); // Refresh catalog ratings
-                this.openReviewModal(productId); // Refresh modal reviews
+                this.loadCatalog();
+                this.openReviewModal(productId);
             } else {
                 this.showToast(saved.message || 'Error submitting review.', 'error');
             }
@@ -505,7 +551,7 @@ class SaranyaMartApp {
         });
     }
 
-    // WEEK 2: SHOPPING CART ENGINE
+    // SHOPPING CART & PROMO COUPONS (Week 6)
     addToCart(productId) {
         const product = this.allProducts.find(p => p.id === productId);
         if (!product) return;
@@ -546,27 +592,65 @@ class SaranyaMartApp {
         document.getElementById('cart-modal').classList.add('hidden');
     }
 
+    async applyCouponCart() {
+        const code = document.getElementById('cart-coupon-input').value.trim().toUpperCase();
+        const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const msgDiv = document.getElementById('cart-coupon-msg');
+
+        if (!code) {
+            msgDiv.textContent = 'Please enter a coupon code.';
+            msgDiv.style.color = '#ef4444';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/coupons/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, orderTotal: subtotal })
+            });
+            const data = await response.json();
+
+            if (response.ok && data.valid) {
+                this.appliedCoupon = data;
+                msgDiv.textContent = data.message;
+                msgDiv.style.color = '#34d399';
+                this.renderCartModal();
+                this.showToast(`Promo Code '${data.code}' Applied!`, 'success');
+            } else {
+                this.appliedCoupon = null;
+                msgDiv.textContent = data.message || 'Invalid coupon.';
+                msgDiv.style.color = '#ef4444';
+                this.renderCartModal();
+            }
+        } catch (e) {
+            msgDiv.textContent = 'Error applying coupon.';
+            msgDiv.style.color = '#ef4444';
+        }
+    }
+
     renderCartModal() {
         const container = document.getElementById('cart-items-container');
         container.innerHTML = '';
 
         if (this.cart.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Your shopping cart is empty.</p>';
-            document.getElementById('cart-total-display').textContent = '₹0';
+            document.getElementById('cart-total-display').textContent = this.formatPrice(0);
+            document.getElementById('cart-discount-row').classList.add('hidden');
             return;
         }
 
-        let total = 0;
+        let subtotal = 0;
         this.cart.forEach(item => {
-            const subtotal = item.price * item.quantity;
-            total += subtotal;
+            const itemSub = item.price * item.quantity;
+            subtotal += itemSub;
 
             const row = document.createElement('div');
             row.className = 'cart-item-row';
             row.innerHTML = `
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.title}</div>
-                    <div class="cart-item-price">₹${item.price.toLocaleString('en-IN')} × ${item.quantity} = ₹${subtotal.toLocaleString('en-IN')}</div>
+                    <div class="cart-item-price">${this.formatPrice(item.price)} × ${item.quantity} = ${this.formatPrice(itemSub)}</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted);">Seller: ${item.sellerName}</div>
                 </div>
                 <div class="cart-qty-ctrl">
@@ -579,7 +663,15 @@ class SaranyaMartApp {
             container.appendChild(row);
         });
 
-        document.getElementById('cart-total-display').textContent = `₹${total.toLocaleString('en-IN')}`;
+        document.getElementById('cart-total-display').textContent = this.formatPrice(subtotal);
+
+        const discountRow = document.getElementById('cart-discount-row');
+        if (this.appliedCoupon && this.appliedCoupon.valid) {
+            discountRow.classList.remove('hidden');
+            document.getElementById('cart-discount-display').textContent = `-${this.formatPrice(this.appliedCoupon.discountAmount)}`;
+        } else {
+            discountRow.classList.add('hidden');
+        }
     }
 
     updateCartQty(productId, delta) {
@@ -604,7 +696,7 @@ class SaranyaMartApp {
         this.renderCartModal();
     }
 
-    // WEEK 2: CHECKOUT & PLACE ORDER
+    // CHECKOUT & PLACE ORDER
     openCheckoutModal() {
         if (this.cart.length === 0) {
             this.showToast('Your cart is empty. Add products first!', 'info');
@@ -617,8 +709,15 @@ class SaranyaMartApp {
             return;
         }
 
-        const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        document.getElementById('checkout-total-price').textContent = `₹${total.toLocaleString('en-IN')}`;
+        let total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        if (this.appliedCoupon && this.appliedCoupon.valid) {
+            total = Math.max(0, total - this.appliedCoupon.discountAmount);
+            const discInfo = document.getElementById('checkout-discount-info');
+            discInfo.classList.remove('hidden');
+            discInfo.textContent = `Promo Coupon '${this.appliedCoupon.code}' Applied (-${this.formatPrice(this.appliedCoupon.discountAmount)})`;
+        }
+
+        document.getElementById('checkout-total-price').textContent = this.formatPrice(total);
         this.closeCartModal();
         document.getElementById('checkout-modal').classList.remove('hidden');
     }
@@ -635,7 +734,11 @@ class SaranyaMartApp {
             return;
         }
 
-        const totalAmount = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        let totalAmount = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        if (this.appliedCoupon && this.appliedCoupon.valid) {
+            totalAmount = Math.max(0, totalAmount - this.appliedCoupon.discountAmount);
+        }
+
         const orderPayload = {
             buyerId: this.currentUser.id,
             buyerName: this.currentUser.fullName,
@@ -665,11 +768,19 @@ class SaranyaMartApp {
 
             if (response.ok && data.success) {
                 this.showToast('Order Placed Successfully!', 'success');
+                const newOrder = data.order;
                 this.cart = [];
+                this.appliedCoupon = null;
                 localStorage.removeItem('sm_cart');
                 this.updateCartBadge();
                 this.closeCheckoutModal();
-                this.showBuyerOrders();
+                
+                // Open Printable Invoice automatically
+                if (newOrder) {
+                    this.openInvoiceModal(newOrder);
+                } else {
+                    this.showBuyerOrders();
+                }
             } else {
                 this.showToast(data.message || 'Checkout failed.', 'error');
             }
@@ -681,7 +792,7 @@ class SaranyaMartApp {
         }
     }
 
-    // BUYER ORDER HISTORY & ORDER CANCELLATION (Week 5)
+    // BUYER ORDER HISTORY & PRINTABLE INVOICE (Week 6)
     async showBuyerOrders() {
         if (!this.currentUser) return;
         this.showView('buyer-orders-view');
@@ -711,6 +822,7 @@ class SaranyaMartApp {
                             <div><strong>Order #${o.id}</strong> | Date: ${o.orderDate || 'Recent'}</div>
                             <div>
                                 <span class="status-chip ${statusClass}">${o.status}</span>
+                                <button class="btn btn-outline btn-sm" style="margin-left:0.5rem;" onclick='app.openInvoiceModal(${JSON.stringify(o)})'><i class="fa-solid fa-receipt"></i> Invoice</button>
                                 ${canCancel ? `<button class="btn btn-danger btn-sm" style="margin-left:0.5rem;" onclick="app.cancelOrder(${o.id})"><i class="fa-solid fa-ban"></i> Cancel Order</button>` : ''}
                             </div>
                         </div>
@@ -720,11 +832,11 @@ class SaranyaMartApp {
                         <div style="font-size: 0.9rem; margin-bottom: 0.75rem;">
                             <strong>Items (${o.items ? o.items.length : 0}):</strong>
                             <ul style="padding-left: 1.25rem; color: var(--text-muted);">
-                                ${o.items ? o.items.map(i => `<li>${i.title} × ${i.quantity} (₹${i.price})</li>`).join('') : ''}
+                                ${o.items ? o.items.map(i => `<li>${i.title} × ${i.quantity} (${this.formatPrice(i.price)})</li>`).join('') : ''}
                             </ul>
                         </div>
                         <div style="font-size: 1.1rem; font-weight: 800; color: var(--secondary);">
-                            Total: ₹${o.totalAmount.toLocaleString('en-IN')}
+                            Total: ${this.formatPrice(o.totalAmount)}
                         </div>
                     `;
                     container.appendChild(card);
@@ -735,6 +847,83 @@ class SaranyaMartApp {
         }
     }
 
+    openInvoiceModal(order) {
+        const body = document.getElementById('printable-invoice-body');
+        const gstTax = Math.round(order.totalAmount * 0.18 * 100.0) / 100.0;
+        const subtotalBeforeTax = Math.round((order.totalAmount - gstTax) * 100.0) / 100.0;
+
+        let itemsHtml = '';
+        if (order.items) {
+            order.items.forEach(i => {
+                const itemTotal = i.price * i.quantity;
+                itemsHtml += `
+                    <tr>
+                        <td>${i.title}</td>
+                        <td>${i.quantity}</td>
+                        <td>${this.formatPrice(i.price)}</td>
+                        <td>${this.formatPrice(itemTotal)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        body.innerHTML = `
+            <div class="invoice-box">
+                <div class="invoice-header-row">
+                    <div class="invoice-brand">Saranya<span>Mart</span></div>
+                    <div class="invoice-title-tag">TAX INVOICE</div>
+                </div>
+                <div class="invoice-meta-grid">
+                    <div>
+                        <strong>Billed To:</strong><br>
+                        ${order.buyerName}<br>
+                        ${order.buyerEmail}<br>
+                        ${order.shippingAddress}
+                    </div>
+                    <div style="text-align: right;">
+                        <strong>Invoice No:</strong> #INV-${order.id}<br>
+                        <strong>Order Date:</strong> ${order.orderDate || 'Recent'}<br>
+                        <strong>Payment Status:</strong> Paid (Verified)<br>
+                        <strong>GSTIN:</strong> 33AAACS1947M1Z5
+                    </div>
+                </div>
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Item Description</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                <table class="invoice-summary-table">
+                    <tr>
+                        <td>Subtotal:</td>
+                        <td>${this.formatPrice(subtotalBeforeTax)}</td>
+                    </tr>
+                    <tr>
+                        <td>GST (18%):</td>
+                        <td>${this.formatPrice(gstTax)}</td>
+                    </tr>
+                    <tr class="invoice-grand-total">
+                        <td>Total Paid:</td>
+                        <td>${this.formatPrice(order.totalAmount)}</td>
+                    </tr>
+                </table>
+            </div>
+        `;
+
+        document.getElementById('invoice-modal').classList.remove('hidden');
+    }
+
+    closeInvoiceModal() {
+        document.getElementById('invoice-modal').classList.add('hidden');
+    }
+
     async cancelOrder(orderId) {
         if (!confirm('Are you sure you want to cancel this order? Item stock will be automatically restored.')) return;
         try {
@@ -743,7 +932,7 @@ class SaranyaMartApp {
             if (data.success) {
                 this.showToast(data.message, 'success');
                 this.showBuyerOrders();
-                this.loadCatalog(); // Refresh stock in catalog
+                this.loadCatalog();
             } else {
                 this.showToast(data.message || 'Order could not be cancelled.', 'error');
             }
@@ -752,12 +941,11 @@ class SaranyaMartApp {
         }
     }
 
-    // WEEK 3: SELLER DASHBOARD ENGINE
+    // SELLER DASHBOARD ENGINE
     async loadSellerDashboard() {
         if (!this.currentUser) return;
 
         try {
-            // Load Seller Inventory
             const prodRes = await fetch(`/api/products/seller/${this.currentUser.id}`);
             const prodData = await prodRes.json();
 
@@ -773,7 +961,7 @@ class SaranyaMartApp {
                         <td>#${p.id}</td>
                         <td><strong>${p.title}</strong></td>
                         <td>${p.category}</td>
-                        <td class="text-emerald">₹${p.price.toLocaleString('en-IN')}</td>
+                        <td class="text-emerald">${this.formatPrice(p.price)}</td>
                         <td>${p.stockQuantity} pcs</td>
                         <td><i class="fa-solid fa-star text-amber"></i> ${p.averageRating ? p.averageRating.toFixed(1) : '5.0'} (${p.reviewCount || 0})</td>
                         <td>
@@ -785,10 +973,9 @@ class SaranyaMartApp {
                 });
 
                 document.getElementById('seller-stat-products').textContent = prodData.products.length;
-                document.getElementById('seller-stat-value').textContent = `₹${totalValue.toLocaleString('en-IN')}`;
+                document.getElementById('seller-stat-value').textContent = this.formatPrice(totalValue);
             }
 
-            // Load Orders Received
             const orderRes = await fetch(`/api/orders/seller/${this.currentUser.id}`);
             const orderData = await orderRes.json();
 
@@ -803,7 +990,7 @@ class SaranyaMartApp {
                         <td>#${o.id}</td>
                         <td><strong>${o.buyerName}</strong><br><small style="color:var(--text-muted);">${o.buyerEmail}</small></td>
                         <td>${o.items ? o.items.map(i => `${i.title} (×${i.quantity})`).join(', ') : ''}</td>
-                        <td class="text-emerald">₹${o.totalAmount.toLocaleString('en-IN')}</td>
+                        <td class="text-emerald">${this.formatPrice(o.totalAmount)}</td>
                         <td>${o.orderDate || 'Recent'}</td>
                         <td>
                             <select onchange="app.updateOrderStatusSeller(${o.id}, this.value)" class="form-select" style="padding:0.25rem 0.5rem; font-size:0.8rem;">
@@ -921,14 +1108,14 @@ class SaranyaMartApp {
         }
     }
 
-    // WEEK 4: ADMIN DASHBOARD & PRODUCT MODERATION ENGINE
+    // ADMIN DASHBOARD & CSV REPORT EXPORT (Week 6)
     async loadAdminData() {
         try {
-            // Fetch Users
             const userRes = await fetch('/api/users');
             const userData = await userRes.json();
 
             if (userData.success && userData.users) {
+                this.adminUsers = userData.users;
                 const tbody = document.getElementById('admin-users-tbody');
                 tbody.innerHTML = '';
                 let sellers = 0, buyers = 0;
@@ -953,11 +1140,11 @@ class SaranyaMartApp {
                 document.getElementById('admin-total-buyers').textContent = buyers;
             }
 
-            // Fetch Orders
             const orderRes = await fetch('/api/orders');
             const orderData = await orderRes.json();
 
             if (orderData.success && orderData.orders) {
+                this.adminOrders = orderData.orders;
                 const tbody = document.getElementById('admin-orders-tbody');
                 tbody.innerHTML = '';
                 document.getElementById('admin-total-orders').textContent = orderData.orders.length;
@@ -968,17 +1155,16 @@ class SaranyaMartApp {
                         <td>#${o.id}</td>
                         <td><strong>${o.buyerName}</strong></td>
                         <td>${o.shippingAddress}</td>
-                        <td class="text-emerald">₹${o.totalAmount.toLocaleString('en-IN')}</td>
+                        <td class="text-emerald">${this.formatPrice(o.totalAmount)}</td>
                         <td><span class="status-chip ${(o.status||'pending').toLowerCase()}">${o.status}</span></td>
                         <td>
-                            ${(o.status !== 'Cancelled') ? `<button class="btn btn-danger btn-sm" onclick="app.cancelOrder(${o.id})"><i class="fa-solid fa-ban"></i> Cancel</button>` : '<span style="color:var(--text-muted);">Cancelled</span>'}
+                            <button class="btn btn-outline btn-sm" onclick='app.openInvoiceModal(${JSON.stringify(o)})'><i class="fa-solid fa-receipt"></i> Invoice</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
             }
 
-            // Fetch Products for Moderation
             const prodRes = await fetch('/api/products?admin=true');
             const prodData = await prodRes.json();
 
@@ -992,7 +1178,7 @@ class SaranyaMartApp {
                         <td>#${p.id}</td>
                         <td><strong>${p.title}</strong></td>
                         <td>${p.sellerName}</td>
-                        <td class="text-emerald">₹${p.price.toLocaleString('en-IN')}</td>
+                        <td class="text-emerald">${this.formatPrice(p.price)}</td>
                         <td>${p.category}</td>
                         <td><span class="status-chip ${p.status === 'flagged' ? 'pending' : 'delivered'}">${p.status}</span></td>
                         <td>
@@ -1008,6 +1194,48 @@ class SaranyaMartApp {
         } catch (e) {
             console.error('Admin Load Error:', e);
         }
+    }
+
+    exportUsersCSV() {
+        if (!this.adminUsers || this.adminUsers.length === 0) {
+            this.showToast('No user data available to export.', 'info');
+            return;
+        }
+
+        let csv = 'ID,Full Name,Email,Role,Registered Date\n';
+        this.adminUsers.forEach(u => {
+            csv += `"${u.id}","${u.fullName}","${u.email}","${u.role}","${u.createdAt || ''}"\n`;
+        });
+
+        this.downloadCSV(csv, 'saranyamart_users_report.csv');
+        this.showToast('Users CSV Report exported!', 'success');
+    }
+
+    exportOrdersCSV() {
+        if (!this.adminOrders || this.adminOrders.length === 0) {
+            this.showToast('No order data available to export.', 'info');
+            return;
+        }
+
+        let csv = 'Order ID,Buyer Name,Buyer Email,Total Amount (INR),Status,Shipping Address,Order Date\n';
+        this.adminOrders.forEach(o => {
+            csv += `"${o.id}","${o.buyerName}","${o.buyerEmail}","${o.totalAmount}","${o.status}","${o.shippingAddress}","${o.orderDate || ''}"\n`;
+        });
+
+        this.downloadCSV(csv, 'saranyamart_orders_report.csv');
+        this.showToast('Orders CSV Report exported!', 'success');
+    }
+
+    downloadCSV(csvContent, fileName) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     switchAdminTab(tab) {

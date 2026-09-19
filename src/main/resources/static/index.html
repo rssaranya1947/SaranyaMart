@@ -33,8 +33,15 @@
                 <button class="search-btn" onclick="app.loadCatalog()">Search</button>
             </div>
 
-            <!-- Header Action Controls -->
+            <!-- Header Action Controls & Currency Selector -->
             <div class="nav-actions" id="nav-actions">
+                <div class="currency-selector-box">
+                    <select id="currency-select" class="form-select form-select-sm" onchange="app.changeCurrency(this.value)">
+                        <option value="INR" selected>₹ INR</option>
+                        <option value="USD">$ USD</option>
+                        <option value="EUR">€ EUR</option>
+                    </select>
+                </div>
                 <button class="btn btn-cart" id="btn-open-wishlist-guest" onclick="app.openWishlistModal()">
                     <i class="fa-solid fa-heart text-danger"></i> Wishlist
                     <span class="cart-badge" id="wishlist-badge-count">0</span>
@@ -53,6 +60,13 @@
 
             <!-- Logged-In User Profile Info -->
             <div class="user-profile-header hidden" id="user-profile-header">
+                <div class="currency-selector-box">
+                    <select id="currency-select-user" class="form-select form-select-sm" onchange="app.changeCurrency(this.value)">
+                        <option value="INR" selected>₹ INR</option>
+                        <option value="USD">$ USD</option>
+                        <option value="EUR">€ EUR</option>
+                    </select>
+                </div>
                 <button class="btn btn-cart" onclick="app.openWishlistModal()">
                     <i class="fa-solid fa-heart text-danger"></i> Wishlist
                     <span class="cart-badge" id="wishlist-badge-count-user">0</span>
@@ -92,7 +106,7 @@
                 <div class="hero-text-content">
                     <span class="hero-tag"><i class="fa-solid fa-sparkles"></i> SaranyaMart Multi-Seller Marketplace</span>
                     <h1>Shop Laptops, Mobiles & Electronics</h1>
-                    <p>Verified sellers, 5-star buyer ratings, and instant checkout.</p>
+                    <p>Verified sellers, 5-star buyer ratings, promo coupons, and instant checkout.</p>
                 </div>
                 <!-- Quick Demo Logins Box -->
                 <div class="demo-credentials-card">
@@ -148,7 +162,7 @@
             <div class="dashboard-header">
                 <div>
                     <h2><i class="fa-solid fa-clock-rotate-left"></i> My Order History</h2>
-                    <p>Track your placed orders, cancel pending items, and view purchase summaries.</p>
+                    <p>Track your placed orders, download GST invoices, and view purchase summaries.</p>
                 </div>
                 <button class="btn btn-outline" onclick="app.showHome()">
                     <i class="fa-solid fa-arrow-left"></i> Back to Shopping
@@ -246,16 +260,18 @@
             </div>
         </section>
 
-        <!-- ADMIN DASHBOARD VIEW (Weeks 4 & 5) -->
+        <!-- ADMIN DASHBOARD VIEW (Weeks 4, 5 & 6) -->
         <section id="admin-dashboard" class="dashboard-section hidden">
             <div class="dashboard-header">
                 <div>
                     <h2><i class="fa-solid fa-shield-halved"></i> Admin Control Panel</h2>
-                    <p>Platform Supervision: Users, Orders, Moderation & Report Export.</p>
+                    <p>Platform Supervision: Users, Orders, Moderation & CSV Reports.</p>
                 </div>
-                <button class="btn btn-secondary" onclick="app.loadAdminData()">
-                    <i class="fa-solid fa-rotate"></i> Refresh Metrics
-                </button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="btn btn-outline" onclick="app.exportUsersCSV()"><i class="fa-solid fa-file-csv"></i> Export Users CSV</button>
+                    <button class="btn btn-outline" onclick="app.exportOrdersCSV()"><i class="fa-solid fa-file-csv"></i> Export Orders CSV</button>
+                    <button class="btn btn-secondary" onclick="app.loadAdminData()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
             </div>
 
             <div class="stats-row">
@@ -323,7 +339,7 @@
                                 <th>Shipping Address</th>
                                 <th>Total Amount</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="admin-orders-tbody"></tbody>
@@ -350,6 +366,19 @@
             </div>
         </section>
     </main>
+
+    <!-- PRINTABLE ORDER INVOICE MODAL (Week 6) -->
+    <div id="invoice-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass-modal invoice-modal-content">
+            <button class="modal-close" onclick="app.closeInvoiceModal()">&times;</button>
+            <div id="printable-invoice-body">
+                <!-- Dynamically generated invoice layout -->
+            </div>
+            <div class="invoice-actions no-print" style="margin-top: 1.5rem; text-align: right;">
+                <button class="btn btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save as PDF</button>
+            </div>
+        </div>
+    </div>
 
     <!-- WISHLIST MODAL (Week 5) -->
     <div id="wishlist-modal" class="modal-backdrop hidden">
@@ -414,7 +443,7 @@
         </div>
     </div>
 
-    <!-- SHOPPING CART MODAL (Week 2) -->
+    <!-- SHOPPING CART MODAL (Weeks 2 & 6 Promo Code) -->
     <div id="cart-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal cart-modal-content">
             <button class="modal-close" onclick="app.closeCartModal()">&times;</button>
@@ -425,10 +454,26 @@
                 <!-- Cart items list dynamically inserted -->
             </div>
 
+            <!-- Promo Code Coupon Entry (Week 6) -->
+            <div class="coupon-box margin-bottom">
+                <div class="form-group" style="margin-bottom:0.5rem;">
+                    <label for="cart-coupon-input"><i class="fa-solid fa-ticket text-amber"></i> Apply Discount Promo Code:</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" id="cart-coupon-input" placeholder="e.g. SARANYA10 or WELCOME20" style="text-transform:uppercase;">
+                        <button class="btn btn-outline btn-sm" onclick="app.applyCouponCart()">Apply</button>
+                    </div>
+                </div>
+                <div id="cart-coupon-msg" class="text-emerald" style="font-size:0.8rem;"></div>
+            </div>
+
             <div class="cart-summary-card">
                 <div class="cart-subtotal-row">
-                    <span>Total Amount:</span>
+                    <span>Subtotal:</span>
                     <strong class="cart-total-price" id="cart-total-display">₹0</strong>
+                </div>
+                <div class="cart-subtotal-row hidden" id="cart-discount-row">
+                    <span>Discount:</span>
+                    <strong style="color:#ef4444;" id="cart-discount-display">-₹0</strong>
                 </div>
                 <button class="btn btn-primary btn-block btn-lg" onclick="app.openCheckoutModal()">
                     <span>Proceed to Checkout</span> <i class="fa-solid fa-arrow-right"></i>
@@ -437,7 +482,7 @@
         </div>
     </div>
 
-    <!-- CHECKOUT MODAL (Week 2) -->
+    <!-- CHECKOUT MODAL (Weeks 2 & 6) -->
     <div id="checkout-modal" class="modal-backdrop hidden">
         <div class="modal-content glass-modal">
             <button class="modal-close" onclick="app.closeCheckoutModal()">&times;</button>
@@ -452,6 +497,7 @@
 
                 <div class="checkout-summary-box">
                     <div>Items Total: <strong id="checkout-total-price">₹0</strong></div>
+                    <div id="checkout-discount-info" class="text-emerald hidden">Promo Discount Applied</div>
                     <div class="text-emerald"><i class="fa-solid fa-circle-check"></i> Free Shipping Applied</div>
                 </div>
 
