@@ -135,18 +135,43 @@ public class DatabaseManager {
     private static void seedProductsIfEmpty() {
         if (productMap.isEmpty()) {
             int p1 = generateNextProductId();
-            productMap.put(p1, new Product(p1, "High Performance Laptop", "15.6 inch FHD, Intel i7, 16GB RAM, 512GB SSD", 45000.00, "Laptop", "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500", 102, "Priya Electronics", 15, "active", "2026-08-12 10:00:00"));
+            productMap.put(p1, new Product(p1, "High Performance UltraBook", "15.6 inch FHD IPS, Intel Core i7, 16GB RAM, 512GB SSD", 45000.00, "Laptop", "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600", 102, "Priya Electronics", 15, "active", "2026-08-12 10:00:00"));
 
             int p2 = generateNextProductId();
-            productMap.put(p2, new Product(p2, "Smart Mobile 5G", "6.7 inch AMOLED, 128GB Storage, 50MP Camera", 18000.00, "Mobile", "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500", 102, "Priya Electronics", 4, "active", "2026-08-12 10:00:00"));
+            productMap.put(p2, new Product(p2, "Dell XPS 15 Gaming Laptop", "4K OLED Touch, Intel i9, RTX 4070, 32GB RAM, 1TB SSD", 85000.00, "Laptop", "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600", 102, "Priya Electronics", 8, "active", "2026-08-12 10:00:00"));
 
             int p3 = generateNextProductId();
-            productMap.put(p3, new Product(p3, "Noise Cancelling Headphones", "Wireless Over-Ear Bluetooth Headphones with HD Mic", 2500.00, "Electronics", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500", 102, "Priya Electronics", 30, "active", "2026-08-12 10:00:00"));
+            productMap.put(p3, new Product(p3, "Apple MacBook Pro 16\"", "M3 Max Chip, 36GB Unified Memory, 1TB SSD, Liquid Retina XDR", 145000.00, "Laptop", "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600", 102, "Priya Electronics", 5, "active", "2026-08-12 10:00:00"));
 
             int p4 = generateNextProductId();
-            productMap.put(p4, new Product(p4, "Smart Fitness Watch", "Heart Rate Monitor, GPS, Water Resistant", 4500.00, "Electronics", "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500", 102, "Priya Electronics", 20, "active", "2026-08-12 10:00:00"));
+            productMap.put(p4, new Product(p4, "Smart Mobile 5G", "6.7 inch AMOLED 120Hz, 128GB Storage, 50MP Camera", 18000.00, "Mobile", "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600", 102, "Priya Electronics", 20, "active", "2026-08-12 10:00:00"));
+
+            int p5 = generateNextProductId();
+            productMap.put(p5, new Product(p5, "Samsung Galaxy S24 Ultra 5G", "200MP Camera, Titanium Frame, S Pen Support, 512GB Storage", 119999.00, "Mobile", "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600", 102, "Priya Electronics", 10, "active", "2026-08-12 10:00:00"));
+
+            int p6 = generateNextProductId();
+            productMap.put(p6, new Product(p6, "iPhone 15 Pro Max 256GB", "A17 Pro Chip, Titanium Design, 5x Telephoto Zoom Camera", 134900.00, "Mobile", "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=600", 102, "Priya Electronics", 7, "active", "2026-08-12 10:00:00"));
+
+            int p7 = generateNextProductId();
+            productMap.put(p7, new Product(p7, "Sony WH-1000XM5 Headphones", "Industry-leading Noise Cancelling Wireless Headphones", 24990.00, "Electronics", "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600", 102, "Priya Electronics", 25, "active", "2026-08-12 10:00:00"));
+
+            int p8 = generateNextProductId();
+            productMap.put(p8, new Product(p8, "Apple Watch Series 9 GPS", "Always-On Retina Display, S9 SiP, ECG & Blood Oxygen Sensor", 41900.00, "Electronics", "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600", 102, "Priya Electronics", 18, "active", "2026-08-12 10:00:00"));
+
+            int p9 = generateNextProductId();
+            productMap.put(p9, new Product(p9, "JBL Flip 6 Speaker", "IP67 Waterproof & Dustproof Portable Bluetooth Speaker", 9999.00, "Electronics", "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600", 102, "Priya Electronics", 30, "active", "2026-08-12 10:00:00"));
+
+            int p10 = generateNextProductId();
+            productMap.put(p10, new Product(p10, "Classic Leather Oxford Shoes", "Handcrafted Genuine Leather Formal Shoes for Men", 3499.00, "Fashion", "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600", 102, "Priya Electronics", 40, "active", "2026-08-12 10:00:00"));
+
+            int p11 = generateNextProductId();
+            productMap.put(p11, new Product(p11, "Designer Leather Biker Jacket", "Premium Quality Genuine Leather Jacket with Quilted Linings", 4999.00, "Fashion", "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600", 102, "Priya Electronics", 12, "active", "2026-08-12 10:00:00"));
+
+            int p12 = generateNextProductId();
+            productMap.put(p12, new Product(p12, "Minimalist Chronograph Wristwatch", "Stainless Steel Case, Scratch Resistant Sapphire Glass", 6500.00, "Fashion", "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=600", 102, "Priya Electronics", 22, "active", "2026-08-12 10:00:00"));
         }
     }
+
 
     private static void seedSampleOrdersIfEmpty() {
         if (orderMap.isEmpty()) {
