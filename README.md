@@ -188,3 +188,7 @@ Once running, navigate your web browser to:
 - **Admin**: `admin@saranyamart.com` | Password: `Admin@123`
 - **Seller**: `seller@saranyamart.com` | Password: `Seller@123`
 - **Buyer**: `buyer@saranyamart.com` | Password: `Buyer@123`
+
+
+## Commit history: 34 commits
+
