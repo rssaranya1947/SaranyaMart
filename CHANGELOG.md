@@ -9,3 +9,6 @@
 ## Week 4 - Admin controls
 - edit delete fulfillment moderation
 
+## Week 5 - Reviews wishlist
+- 5-star cancel restock filters
+
