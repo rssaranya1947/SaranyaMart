@@ -15,3 +15,6 @@
 ## Week 6 - Coupons invoices
 - SARANYA10 GST CSV
 
+## Week 7 - Messaging storefronts
+- inquiries alerts theme
+
