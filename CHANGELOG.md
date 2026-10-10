@@ -27,3 +27,6 @@
 ## Week 10 - Polish
 - chips ER patterns API table
 
+## Week 11 - Final
+- report deck demo regression
+
