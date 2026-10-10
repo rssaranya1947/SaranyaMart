@@ -18,3 +18,6 @@
 ## Week 7 - Messaging storefronts
 - inquiries alerts theme
 
+## Week 8 - Testing CI
+- JUnit Mockito SecurityFilter health
+
