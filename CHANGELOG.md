@@ -24,3 +24,6 @@
 ## Week 9 - Chatbot
 - ChatProvider Mock Gemini rate-limit
 
+## Week 10 - Polish
+- chips ER patterns API table
+
