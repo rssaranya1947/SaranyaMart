@@ -39,6 +39,12 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
+        if (order.getPaymentMethod() == null || order.getPaymentMethod().trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Payment method is required to place an order.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
         Order createdOrder = orderDao.createOrder(order);
         response.put("success", true);
         response.put("message", "Order placed successfully!");

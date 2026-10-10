@@ -556,6 +556,38 @@
                     <textarea id="checkout-address" required placeholder="Enter full address, city, pincode..." rows="3"></textarea>
                 </div>
 
+                <!-- PAYMENT METHOD -->
+                <div class="form-group">
+                    <label><i class="fa-solid fa-credit-card"></i> Payment Method</label>
+                    <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.4rem;">
+                        <label class="payment-option">
+                            <input type="radio" name="checkout-payment" value="UPI" required>
+                            <span class="payment-option-icon"><i class="fa-solid fa-mobile-screen-button"></i></span>
+                            <span>UPI <small style="color:var(--text-muted);">(Google Pay, PhonePe, Paytm)</small></span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="checkout-payment" value="Credit/Debit Card">
+                            <span class="payment-option-icon"><i class="fa-solid fa-credit-card"></i></span>
+                            <span>Credit / Debit Card</span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="checkout-payment" value="Net Banking">
+                            <span class="payment-option-icon"><i class="fa-solid fa-building-columns"></i></span>
+                            <span>Net Banking</span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="checkout-payment" value="Wallet">
+                            <span class="payment-option-icon"><i class="fa-solid fa-wallet"></i></span>
+                            <span>Wallet <small style="color:var(--text-muted);">(Amazon Pay, Mobikwik)</small></span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="checkout-payment" value="Cash on Delivery">
+                            <span class="payment-option-icon"><i class="fa-solid fa-money-bill-wave"></i></span>
+                            <span>Cash on Delivery</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="checkout-summary-box">
                     <div>Items Total: <strong id="checkout-total-price">₹0</strong></div>
                     <div id="checkout-discount-info" class="text-emerald hidden">Promo Discount Applied</div>

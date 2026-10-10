@@ -901,6 +901,8 @@ class SaranyaMartApp {
         }
 
         document.getElementById('checkout-total-price').textContent = this.formatPrice(total);
+        // Reset payment method selection on each open
+        document.querySelectorAll('input[name="checkout-payment"]').forEach(r => r.checked = false);
         this.closeCartModal();
         document.getElementById('checkout-modal').classList.remove('hidden');
     }
@@ -917,6 +919,13 @@ class SaranyaMartApp {
             return;
         }
 
+        const paymentMethodInput = document.querySelector('input[name="checkout-payment"]:checked');
+        if (!paymentMethodInput) {
+            this.showToast('Please select a payment method.', 'error');
+            return;
+        }
+        const paymentMethod = paymentMethodInput.value;
+
         let totalAmount = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         if (this.appliedCoupon && this.appliedCoupon.valid) {
             totalAmount = Math.max(0, totalAmount - this.appliedCoupon.discountAmount);
@@ -928,6 +937,7 @@ class SaranyaMartApp {
             buyerEmail: this.currentUser.email,
             totalAmount: totalAmount,
             shippingAddress: address,
+            paymentMethod: paymentMethod,
             items: this.cart.map(i => ({
                 productId: i.productId,
                 title: i.title,
@@ -1012,6 +1022,9 @@ class SaranyaMartApp {
                             <strong>Delivery Address:</strong> ${o.shippingAddress}
                         </div>
                         <div style="font-size: 0.9rem; margin-bottom: 0.75rem;">
+                            <strong>Payment Method:</strong> <span style="color:var(--secondary);"><i class="fa-solid fa-credit-card"></i> ${o.paymentMethod || 'N/A'}</span>
+                        </div>
+                        <div style="font-size: 0.9rem; margin-bottom: 0.75rem;">
                             <strong>Items (${o.items ? o.items.length : 0}):</strong>
                             <ul style="padding-left: 1.25rem; color: var(--text-muted);">
                                 ${o.items ? o.items.map(i => `<li>${i.title} × ${i.quantity} (${this.formatPrice(i.price)})</li>`).join('') : ''}
@@ -1065,7 +1078,8 @@ class SaranyaMartApp {
                     <div style="text-align: right;">
                         <strong>Invoice No:</strong> #INV-${order.id}<br>
                         <strong>Order Date:</strong> ${order.orderDate || 'Recent'}<br>
-                        <strong>Payment Status:</strong> Paid (Verified)<br>
+                        <strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}<br>
+                        <strong>Payment Status:</strong> ${order.paymentMethod === 'Cash on Delivery' ? 'Pending (COD)' : 'Paid (Verified)'}<br>
                         <strong>GSTIN:</strong> 33AAACS1947M1Z5
                     </div>
                 </div>
@@ -1092,7 +1106,7 @@ class SaranyaMartApp {
                         <td>${this.formatPrice(gstTax)}</td>
                     </tr>
                     <tr class="invoice-grand-total">
-                        <td>Total Paid:</td>
+                        <td>${order.paymentMethod === 'Cash on Delivery' ? 'Amount to be Paid:' : 'Total Paid:'}</td>
                         <td>${this.formatPrice(order.totalAmount)}</td>
                     </tr>
                 </table>

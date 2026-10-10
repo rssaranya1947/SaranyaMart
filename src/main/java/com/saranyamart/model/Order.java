@@ -13,6 +13,7 @@ public class Order {
     private double totalAmount;
     private String status; // 'Pending', 'Processing', 'Delivered', 'Cancelled'
     private String shippingAddress;
+    private String paymentMethod; // 'UPI', 'Credit/Debit Card', 'Net Banking', 'Cash on Delivery', 'Wallet'
     private String orderDate;
     private List<OrderItem> items;
 
@@ -51,6 +52,9 @@ public class Order {
 
     public String getShippingAddress() { return shippingAddress; }
     public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
     public String getOrderDate() { return orderDate; }
     public void setOrderDate(String orderDate) { this.orderDate = orderDate; }
