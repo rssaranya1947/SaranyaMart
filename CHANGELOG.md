@@ -21,3 +21,6 @@
 ## Week 8 - Testing CI
 - JUnit Mockito SecurityFilter health
 
+## Week 9 - Chatbot
+- ChatProvider Mock Gemini rate-limit
+
