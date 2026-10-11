@@ -39,9 +39,9 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
-        if (order.getPaymentMethod() == null || order.getPaymentMethod().trim().isEmpty()) {
+        if (order.getPaymentMethod() == null || !com.saranyamart.model.PaymentMethod.isValid(order.getPaymentMethod())) {
             response.put("success", false);
-            response.put("message", "Payment method is required to place an order.");
+            response.put("message", "Valid payment method is required (UPI, Credit/Debit Card, Net Banking, Wallet, Cash on Delivery).");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
