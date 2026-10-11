@@ -1191,7 +1191,7 @@ class SaranyaMartApp {
                         <td>#${o.id}</td>
                         <td><strong>${o.buyerName}</strong><br><small style="color:var(--text-muted);">${o.buyerEmail}</small></td>
                         <td>${o.items ? o.items.map(i => `${i.title} (×${i.quantity})`).join(', ') : ''}</td>
-                        <td class="text-emerald">${this.formatPrice(o.totalAmount)}</td>
+                        <td class="text-emerald">${this.formatPrice(o.totalAmount)}<br><small style="color:var(--text-muted);"><i class="fa-solid fa-credit-card"></i> ${o.paymentMethod || 'N/A'}</small></td>
                         <td>${o.orderDate || 'Recent'}</td>
                         <td>
                             <select onchange="app.updateOrderStatusSeller(${o.id}, this.value)" class="form-select" style="padding:0.25rem 0.5rem; font-size:0.8rem;">
