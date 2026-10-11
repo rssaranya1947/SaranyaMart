@@ -113,7 +113,8 @@ erDiagram
 1. **Spring Boot Embedded Tomcat**: Selected for zero-configuration, standalone executable JAR deployment on port 8080.
 2. **Pure Java Data Engine & SQLite Schema**: Chosen for zero external database installation dependency while maintaining 100% SQL schema compliance (`db/schema.sql`).
 3. **Pluggable AI Provider**: Enabled instant offline evaluation via `MockChatProvider` without requiring paid API keys.
+4. **Multi-Option Payment Selection**: Implemented support for 5 payment modalities (UPI, Credit/Debit Card, Net Banking, Wallet, Cash on Delivery) with client/server validation and dynamic GST tax invoice status generation (`Amount to be Paid:` for COD, `Total Paid:` for online payments).
 
 ### Known Limitations:
-1. **Mock Payment Confirmation**: Payment gateway integration is mocked as per Section 1 scope constraints.
+1. **Mock Payment Confirmation**: Payment gateway integration simulated without external bank redirect APIs as per course project scope constraints.
 2. **Local Session Storage**: Per-session rate limiting uses in-memory maps which reset upon server restart.
