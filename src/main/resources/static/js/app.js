@@ -920,6 +920,9 @@ class SaranyaMartApp {
 
     async submitCheckout(event) {
         event.preventDefault();
+        const btn = document.getElementById('btn-confirm-order');
+        if (btn && btn.disabled) return;
+
         const address = document.getElementById('checkout-address').value.trim();
         if (!address) {
             this.showToast('Please enter shipping address.', 'error');
