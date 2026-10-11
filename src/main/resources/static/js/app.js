@@ -908,7 +908,14 @@ class SaranyaMartApp {
     }
 
     closeCheckoutModal() {
+        this.resetCheckoutModal();
         document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    resetCheckoutModal() {
+        const addr = document.getElementById('checkout-address');
+        if (addr) addr.value = '';
+        document.querySelectorAll('input[name="checkout-payment"]').forEach(r => r.checked = false);
     }
 
     async submitCheckout(event) {
