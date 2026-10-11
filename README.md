@@ -192,6 +192,20 @@ All API endpoints strictly follow the standard fixed envelope format:
 
 ---
 
+## 💳 Supported Payment Methods
+
+SaranyaMart provides a realistic multi-option checkout experience across 5 channels:
+
+| Method | Provider Simulation | Invoice Status Generated |
+| :--- | :--- | :--- |
+| **UPI** | Google Pay, PhonePe, Paytm | `Paid (Verified)` with `Total Paid:` |
+| **Credit / Debit Card** | Visa, MasterCard, RuPay | `Paid (Verified)` with `Total Paid:` |
+| **Net Banking** | SBI, HDFC, ICICI, Axis | `Paid (Verified)` with `Total Paid:` |
+| **Wallet** | Amazon Pay, Mobikwik | `Paid (Verified)` with `Total Paid:` |
+| **Cash on Delivery** | Pay upon doorstep delivery | `Pending (COD)` with `Amount to be Paid:` |
+
+---
+
 ## 💻 How to Build, Test & Run
 
 ### 1. Execute Automated Tests & Build
