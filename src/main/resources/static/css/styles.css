@@ -805,6 +805,21 @@ body.light-theme .category-bar {
     font-size: 1rem;
 }
 
+body.light-theme .payment-option {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+body.light-theme .payment-option:hover {
+    background: #f8fafc;
+    border-color: var(--primary);
+}
+
+body.light-theme .payment-option:has(input:checked) {
+    background: #eef2ff;
+    border-color: var(--primary);
+}
+
 /* Print Media Optimization for Tax Invoices */
 @media print {
     .modal-backdrop {
