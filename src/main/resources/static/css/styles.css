@@ -767,15 +767,17 @@ body.light-theme .category-bar {
     border: 1.5px solid var(--border-color);
     border-radius: 10px;
     cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    transition: all 0.2s ease-in-out;
     background: var(--bg-surface);
     font-size: 0.9rem;
     font-weight: 500;
+    user-select: none;
 }
 
 .payment-option:hover {
     border-color: var(--primary);
     background: rgba(99, 102, 241, 0.08);
+    transform: translateY(-1px);
 }
 
 .payment-option input[type="radio"] {
@@ -783,6 +785,7 @@ body.light-theme .category-bar {
     width: 16px;
     height: 16px;
     flex-shrink: 0;
+    cursor: pointer;
 }
 
 .payment-option input[type="radio"]:checked + .payment-option-icon {
@@ -791,7 +794,8 @@ body.light-theme .category-bar {
 
 .payment-option:has(input:checked) {
     border-color: var(--primary);
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(99, 102, 241, 0.14);
+    box-shadow: 0 0 0 1px var(--primary);
 }
 
 .payment-option-icon {
@@ -800,4 +804,20 @@ body.light-theme .category-bar {
     color: var(--text-muted);
     font-size: 1rem;
 }
+
+/* Print Media Optimization for Tax Invoices */
+@media print {
+    .modal-backdrop {
+        background: transparent !important;
+        position: static !important;
+    }
+    .modal-close, .nav-actions, header, footer {
+        display: none !important;
+    }
+    .invoice-box {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
+}
+
 
