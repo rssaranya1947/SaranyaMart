@@ -29,6 +29,29 @@ flowchart TD
     DAOLayer -->|Queries/Updates| StorageEngine
 ```
 
+### 💳 Checkout & Payment Processing Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Buyer as Buyer Browser
+    participant Filter as SecurityFilter
+    participant Controller as OrderController
+    participant Validator as PaymentMethod Validator
+    participant DAO as OrderDao
+    participant DB as DatabaseManager
+
+    Buyer->>Filter: POST /api/orders/checkout (address, paymentMethod, items)
+    Filter->>Controller: Forward sanitized request
+    Controller->>Validator: PaymentMethod.isValid(paymentMethod)
+    Validator-->>Controller: true
+    Controller->>DAO: createOrder(order)
+    DAO->>DB: Deduct inventory stock & persist order
+    DB-->>DAO: Success (orderId generated)
+    DAO-->>Controller: createdOrder
+    Controller-->>Buyer: 201 Created (Tax Invoice Payload)
+```
+
 ---
 
 ## 🗄️ Database Design & ER Schema Specification (Section 4)
