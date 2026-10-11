@@ -1029,7 +1029,7 @@ class SaranyaMartApp {
                             <strong>Delivery Address:</strong> ${o.shippingAddress}
                         </div>
                         <div style="font-size: 0.9rem; margin-bottom: 0.75rem;">
-                            <strong>Payment Method:</strong> <span style="color:var(--secondary);"><i class="fa-solid fa-credit-card"></i> ${o.paymentMethod || 'N/A'}</span>
+                            <strong>Payment Method:</strong> <span style="color:var(--secondary);"><i class="fa-solid ${o.paymentMethod === 'Cash on Delivery' ? 'fa-truck' : 'fa-credit-card'}"></i> ${o.paymentMethod || 'N/A'}</span>
                         </div>
                         <div style="font-size: 0.9rem; margin-bottom: 0.75rem;">
                             <strong>Items (${o.items ? o.items.length : 0}):</strong>
