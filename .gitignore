@@ -15,3 +15,10 @@ saranyamart_*.json
 .settings/
 .classpath
 .project
+
+# OS and Temporary Files
+.DS_Store
+Thumbs.db
+*.log
+task.md
+
