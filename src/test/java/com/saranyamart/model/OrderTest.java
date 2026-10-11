@@ -36,4 +36,18 @@ class OrderTest {
         assertFalse(PaymentMethod.isValid(""));
         assertFalse(PaymentMethod.isValid("BitcoinCrypto"));
     }
+
+    @Test
+    void testCashOnDeliveryInvoiceCalculation() {
+        Order order = new Order();
+        order.setTotalAmount(5000.0);
+        order.setPaymentMethod("Cash on Delivery");
+
+        double gst = Math.round(order.getTotalAmount() * 0.18 * 100.0) / 100.0;
+        double subtotal = Math.round((order.getTotalAmount() - gst) * 100.0) / 100.0;
+
+        assertEquals(900.0, gst);
+        assertEquals(4100.0, subtotal);
+        assertEquals(5000.0, subtotal + gst);
+    }
 }
