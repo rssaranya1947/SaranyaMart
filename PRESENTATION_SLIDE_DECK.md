@@ -20,8 +20,8 @@
 - Modern e-commerce platforms require seamless multi-seller listing management, role-based authorization, instant catalog filtering, security compliance, and real-time customer support.
 
 ### Scope Boundaries (Per Specification)
-- **Included**: Buyer/Seller/Admin authentication, product CRUD, coupon engine (`SARANYA10`), printable invoices, security headers, unit testing suite, CI pipeline, and AI Chatbot widget (Phase 3).
-- **Excluded**: Real-time WebSockets, external mapping APIs, real payment gateways.
+- **Included**: Buyer/Seller/Admin authentication, product CRUD, coupon engine (`SARANYA10`), multi-method checkout (UPI, Card, Net Banking, Wallet, COD), printable invoices, security headers, unit testing suite, CI pipeline, and AI Chatbot widget (Phase 3).
+- **Excluded**: Real-time WebSockets, external banking redirects, physical parcel tracking.
 
 ---
 
@@ -39,10 +39,11 @@ Browser (Vanilla JS Fetch) ──> SecurityFilter ──> RestController (Front 
 
 ### Applied Design Patterns (Section 12)
 - **DAO Pattern**: Abstracted data access (`UserDao`, `ProductDao`, `OrderDao`)
-- **Front Controller**: Central dispatch REST endpoints
+- **Front Controller**: Central dispatch REST endpoints (`OrderController`, `AuthController`)
 - **Singleton**: Thread-safe memory store & ID sequence generator
 - **Strategy Pattern**: `MockChatProvider` vs. `GeminiChatProvider`
-- **Builder Pattern**: Dynamic JSON envelopes & GST invoice construction
+- **Builder Pattern**: Dynamic JSON envelopes & GST invoice construction with dynamic payment status
+- **Payment Domain Model**: `PaymentMethod` enum enforcing valid checkout channels
 
 ---
 
