@@ -118,7 +118,7 @@ All API endpoints strictly follow the standard fixed envelope format:
 | `POST` | `/api/products` | Creates new seller product listing | `201 Created` / `400 Bad Request` |
 | `DELETE`| `/api/products/{id}` | Moderates/removes product listing (Admin/Seller) | `200 OK` / `403 Forbidden` |
 | `GET` | `/api/orders` | Retrieves buyer order history or seller incoming orders | `200 OK` |
-| `POST` | `/api/orders` | Places order from shopping cart contents | `201 Created` |
+| `POST` | `/api/orders/checkout` | Confirms checkout with address & payment method (UPI, Card, Net Banking, Wallet, COD) | `201 Created` / `400 Bad Request` |
 | `POST` | `/api/chat` | AI Chatbot proxy endpoint (Section 11) | `200 OK` / `429 Rate Limited` |
 | `GET` | `/api/v1/health` | Health check endpoint returning `{"status":"UP","db":"UP"}` | `200 OK` |
 
