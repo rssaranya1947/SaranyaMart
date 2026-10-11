@@ -1380,7 +1380,7 @@ class SaranyaMartApp {
                         <td>#${o.id}</td>
                         <td><strong>${o.buyerName}</strong></td>
                         <td>${o.shippingAddress}</td>
-                        <td class="text-emerald">${this.formatPrice(o.totalAmount)}</td>
+                        <td class="text-emerald">${this.formatPrice(o.totalAmount)}<br><small style="color:var(--text-muted);"><i class="fa-solid fa-credit-card"></i> ${o.paymentMethod || 'N/A'}</small></td>
                         <td><span class="status-chip ${(o.status||'pending').toLowerCase()}">${o.status}</span></td>
                         <td>
                             <button class="btn btn-outline btn-sm" onclick='app.openInvoiceModal(${JSON.stringify(o)})'><i class="fa-solid fa-receipt"></i> Invoice</button>
