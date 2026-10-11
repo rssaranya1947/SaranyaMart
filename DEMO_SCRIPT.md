@@ -18,8 +18,9 @@
 3. Click **"Add to Cart"** on *High Performance Laptop*.
 4. Open the **Shopping Cart Modal** icon in header.
 5. Apply promo coupon code `SARANYA10` and point out the 10% discount deduction (-₹4,500).
-6. Click **"Proceed to Checkout"**, enter shipping address *"123 Anna Salai, Chennai"*, and click **"Confirm Order Now"**.
-7. Open **"My Order History"** and click **"Print / Save as PDF Invoice"** to display the GST invoice.
+6. Click **"Proceed to Checkout"**, enter shipping address *"123 Anna Salai, Chennai"*, select **Payment Method** (e.g., UPI, Card, Net Banking, or Cash on Delivery), and click **"Confirm Order Now"**.
+7. Observe automatic **Tax Invoice** popup displaying the selected payment method and dynamic status (`Amount to be Paid:` for COD, `Total Paid:` for online payments).
+8. Open **"My Order History"** to review the placed order with its payment badge.
 
 ### Phase 3: Seller Control Center (1:15 - 1:45)
 1. Click user avatar -> Logout, then click **"Quick Demo Accounts" -> "Seller"** (`seller@saranyamart.com`).
