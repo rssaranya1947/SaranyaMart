@@ -13,7 +13,7 @@
 
     <groupId>com.saranyamart</groupId>
     <artifactId>SaranyaMart</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>SaranyaMart</name>
     <description>SaranyaMart E-Commerce Platform - Spring Boot Application with Embedded Tomcat</description>
 
